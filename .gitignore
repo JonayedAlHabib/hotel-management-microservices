@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# build output
+dist/
+build/
+
+# docs kept local-only (PRD, diagrams, mockups)
+docs/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# docker
+pg-data/
+mongo-data/
