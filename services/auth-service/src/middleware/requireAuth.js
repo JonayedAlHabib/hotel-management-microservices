@@ -1,8 +1,13 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/apiError.js";
-import { User } from "../models/User.js";
 
-async function requireAuth(req, res, next) {
+// Pure, synchronous JWT verification — no DB or Redis lookup per request anymore.
+// That's safe now specifically because access tokens are short-lived
+// (ACCESS_TOKEN_EXPIRES_IN, default 15m): a stolen or "should be revoked" access
+// token dies on its own soon regardless. Revocation lives at the refresh-token
+// layer (Redis) instead — see tokenService.js and the /auth/refresh, /auth/logout
+// controllers.
+function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
 
@@ -10,22 +15,13 @@ async function requireAuth(req, res, next) {
     throw new ApiError(401, "Missing bearer token");
   }
 
-  let payload;
   try {
-    payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: payload.sub, role: payload.role };
+    next();
   } catch (err) {
     throw new ApiError(401, "Invalid or expired token");
   }
-
-  // signature/expiry alone isn't enough — also check the token hasn't been
-  // logged out since it was issued (its tokenVersion must match the user's current one)
-  const user = await User.findById(payload.sub);
-  if (!user || !user.isActive || user.tokenVersion !== payload.tokenVersion) {
-    throw new ApiError(401, "Session expired, please log in again");
-  }
-
-  req.user = { id: user._id.toString(), role: user.role };
-  next();
 }
 
 export { requireAuth };
