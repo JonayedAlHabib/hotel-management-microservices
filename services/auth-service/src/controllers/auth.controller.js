@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
+import { recordFailedLogin, clearLoginAttempts } from "../middleware/rateLimiter.js";
 
 function signToken(user) {
   return jwt.sign(
@@ -44,13 +45,17 @@ async function login(req, res) {
 
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user || !user.isActive) {
+    await recordFailedLogin(email);
     throw new ApiError(401, "Email or password is incorrect");
   }
 
   const matches = await bcrypt.compare(password, user.passwordHash);
   if (!matches) {
+    await recordFailedLogin(email);
     throw new ApiError(401, "Email or password is incorrect");
   }
+
+  await clearLoginAttempts(email);
 
   const token = signToken(user);
   res.json(new ApiResponse(200, { token, user: toPublicUser(user) }, "Logged in successfully"));
