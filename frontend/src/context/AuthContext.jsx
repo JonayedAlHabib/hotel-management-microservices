@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("accessToken"));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +18,8 @@ export function AuthProvider({ children }) {
         const res = await apiClient.get("/auth/get-me");
         setUser(res.data.data.user);
       } catch (err) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         setToken(null);
         setUser(null);
       } finally {
@@ -30,25 +31,29 @@ export function AuthProvider({ children }) {
 
   async function register(payload) {
     const res = await apiClient.post("/auth/register", payload);
-    const { token: newToken, user: newUser } = res.data.data;
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
+    const { accessToken, refreshToken, user: newUser } = res.data.data;
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    setToken(accessToken);
     setUser(newUser);
   }
 
   async function login(payload) {
     const res = await apiClient.post("/auth/login", payload);
-    const { token: newToken, user: newUser } = res.data.data;
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
+    const { accessToken, refreshToken, user: newUser } = res.data.data;
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    setToken(accessToken);
     setUser(newUser);
   }
 
   async function logout() {
+    const refreshToken = localStorage.getItem("refreshToken");
     try {
-      await apiClient.post("/auth/logout");
+      await apiClient.post("/auth/logout", { refreshToken });
     } finally {
-      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       setToken(null);
       setUser(null);
     }
