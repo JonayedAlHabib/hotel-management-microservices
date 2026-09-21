@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem("refreshToken", refreshToken);
     setToken(accessToken);
     setUser(newUser);
+    return newUser;
   }
 
   async function logout() {
