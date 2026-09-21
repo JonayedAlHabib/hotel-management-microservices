@@ -26,3 +26,6 @@ Thumbs.db
 # docker
 pg-data/
 mongo-data/
+
+# locally-uploaded files (room type photos, etc.)
+uploads/
