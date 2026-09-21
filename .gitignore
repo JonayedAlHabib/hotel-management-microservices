@@ -10,6 +10,9 @@ node_modules/
 dist/
 build/
 
+# generated Prisma clients (per-service, regenerated via `prisma generate`)
+src/generated/
+
 # docs kept local-only (PRD, diagrams, mockups)
 docs/
 
