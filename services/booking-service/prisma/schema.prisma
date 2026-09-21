@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RoomType {
+  id           String          @id @default(uuid())
+  name         String          @unique
+  description  String?
+  basePrice    Int
+  maxGuests    Int
+  bedType      String?
+  amenities    Json?
+  isActive     Boolean         @default(true)
+  rooms        Room[]
+  reservations Reservation[]
+  photos       RoomTypePhoto[]
+
+  @@map("room_types")
+}
+
+// UC-A05.1: "up to 10 photos (JPG or PNG, up to 5 MB each)" — a separate
+// table, not a JSON array on RoomType, since each photo has its own metadata
+// (stored filename, public URL, upload time) worth querying/deleting individually.
+model RoomTypePhoto {
+  id         String   @id @default(uuid())
+  roomTypeId String   @map("room_type_id")
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id])
+  filename   String // name on disk, under uploads/room-types/
+  url        String // public path the file is served at
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  @@map("room_type_photos")
+}
+
+model Room {
+  id           String              @id @default(uuid())
+  roomTypeId   String              @map("room_type_id")
+  roomType     RoomType            @relation(fields: [roomTypeId], references: [id])
+  roomNumber   String              @unique @map("room_number")
+  floor        Int?
+  status       RoomStatus          @default(AVAILABLE)
+  isActive     Boolean             @default(true) @map("is_active")
+  reservations Reservation[]
+  history      RoomStatusHistory[]
+
+  @@map("rooms")
+}
+
+model Guest {
+  id           String        @id @default(uuid())
+  userId       String?       @map("user_id")
+  fullName     String        @map("full_name")
+  phone        String?
+  email        String?
+  reservations Reservation[]
+
+  @@map("guests")
+}
+
+model Reservation {
+  id             String                     @id @default(uuid())
+  idempotencyKey String                     @unique @map("idempotency_key")
+  reference      String                     @unique
+  guestId        String                     @map("guest_id")
+  guest          Guest                      @relation(fields: [guestId], references: [id])
+  roomTypeId     String                     @map("room_type_id")
+  roomType       RoomType                   @relation(fields: [roomTypeId], references: [id])
+  roomId         String?                    @map("room_id")
+  room           Room?                      @relation(fields: [roomId], references: [id])
+  checkIn        DateTime                   @map("check_in") @db.Date
+  checkOut       DateTime                   @map("check_out") @db.Date
+  guestCount     Int                        @map("guest_count")
+  specialRequest String?                    @map("special_request") // UC-G09 AC2: up to 500 chars, visible to admin
+  status         ReservationStatus          @default(PENDING)
+  source         ReservationSource          @default(ONLINE)
+  rateSnapshot   Int                        @map("rate_snapshot")
+  taxRateBp      Int                        @map("tax_rate_bp") // basis points, e.g. 500 = 5.00% — BR-03
+  totalAmount    Int                        @map("total_amount")
+  holdExpiresAt  DateTime?                  @map("hold_expires_at")
+  createdBy      String                     @map("created_by")
+  createdAt      DateTime                   @default(now()) @map("created_at")
+  history        ReservationStatusHistory[]
+  changeLog      ReservationChangeLog[]
+
+  @@index([roomTypeId, checkIn, checkOut])
+  @@map("reservations")
+}
+
+model ReservationStatusHistory {
+  id            String      @id @default(uuid())
+  reservationId String      @map("reservation_id")
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  fromStatus    String?     @map("from_status")
+  toStatus      String      @map("to_status")
+  changedBy     String      @map("changed_by")
+  reason        String?
+  changedAt     DateTime    @default(now()) @map("changed_at")
+
+  @@map("reservation_status_history")
+}
+
+// UC-A10.1 AC3: every field a Modify Reservation edit touches is stored as
+// field/old value/new value/user/time — distinct from ReservationStatusHistory,
+// which is specifically about status transitions, not arbitrary field edits.
+model ReservationChangeLog {
+  id            String      @id @default(uuid())
+  reservationId String      @map("reservation_id")
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  field         String
+  oldValue      String?     @map("old_value")
+  newValue      String?     @map("new_value")
+  changedBy     String      @map("changed_by")
+  changedAt     DateTime    @default(now()) @map("changed_at")
+
+  @@map("reservation_change_log")
+}
+
+// UC-A07 AC3: each room status change stores who, when, old status, new
+// status and an optional note. Mirrors ReservationStatusHistory's shape.
+model RoomStatusHistory {
+  id         String   @id @default(uuid())
+  roomId     String   @map("room_id")
+  room       Room     @relation(fields: [roomId], references: [id])
+  fromStatus String?  @map("from_status")
+  toStatus   String   @map("to_status")
+  changedBy  String   @map("changed_by")
+  note       String?
+  changedAt  DateTime @default(now()) @map("changed_at")
+
+  @@map("room_status_history")
+}
+
+enum RoomStatus {
+  AVAILABLE
+  RESERVED
+  OCCUPIED
+  DIRTY
+  CLEANING
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+  NO_SHOW
+}
+
+enum ReservationSource {
+  ONLINE
+  WALK_IN
+  PHONE
+}
