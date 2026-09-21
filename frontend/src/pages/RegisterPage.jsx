@@ -23,7 +23,7 @@ export default function RegisterPage() {
 
     try {
       await register(form);
-      navigate("/profile");
+      navigate("/");
     } catch (err) {
       const data = err.response?.data;
       setError(data?.message || "Something went wrong");
@@ -43,14 +43,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-navy-900 px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-5"
+        className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-5"
       >
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Create an account</h1>
-          <p className="text-sm text-slate-500 mt-1">Register to book a room.</p>
+          <h1 className="text-xl font-semibold text-navy-900">Create an account</h1>
+          <p className="text-sm text-navy-400 mt-1">Register to book a room.</p>
         </div>
 
         {error && (
@@ -81,14 +81,14 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-slate-900 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-50"
+          className="w-full bg-navy-700 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-navy-800 disabled:opacity-50"
         >
           {submitting ? "Creating account…" : "Create account"}
         </button>
 
-        <p className="text-sm text-slate-500 text-center">
+        <p className="text-sm text-navy-500 text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-slate-900 font-medium">
+          <Link to="/login" className="text-bronze-600 font-medium hover:text-bronze-700">
             Log in
           </Link>
         </p>
@@ -100,13 +100,13 @@ export default function RegisterPage() {
 function Field({ label, name, type = "text", value, onChange, error }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-navy-800 mb-1">{label}</label>
       <input
         name={name}
         type={type}
         value={value}
         onChange={onChange}
-        className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+        className="w-full border border-navy-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bronze-400/40 focus:border-bronze-400"
       />
       {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
     </div>
