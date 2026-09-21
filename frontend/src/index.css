@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+/* Royal Bronze palette — from the UI design docs (docs/ui-design). Shared by
+   both the guest and admin flows, so it lives here rather than per-flow. */
+@theme {
+  --color-navy-950: #141d29;
+  --color-navy-900: #1a2634;
+  --color-navy-800: #233144;
+  --color-navy-700: #2c3e50;
+  --color-navy-600: #3d5573;
+  --color-navy-500: #52719a;
+  --color-navy-100: #e6ebf0;
+  --color-navy-50: #f4f6f8;
+
+  --color-bronze-700: #8f6f3f;
+  --color-bronze-600: #a17e4c;
+  --color-bronze-500: #b08d57;
+  --color-bronze-400: #c7a476;
+  --color-bronze-100: #f2e9dc;
+  --color-bronze-50: #faf6ef;
+
+  --color-cream: #f8f6f2;
+}
