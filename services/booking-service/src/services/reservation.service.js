@@ -1,6 +1,7 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma/index.js";
 import { prisma } from "../db/prisma.js";
 import { ApiError } from "../utils/apiError.js";
+import { publishBookingCreated } from "../mq/publisher.js";
 import { checkAvailability } from "./availability.service.js";
 import { todayInHotelTimezone, currentHourInHotelTimezone } from "../utils/date.js";
 import {
@@ -91,7 +92,7 @@ async function createReservation(input) {
           // winner just took, and honestly report "sold out" — correct for a
           // genuinely different booking, wrong for a retry of the same one.
           const winner = await tx.reservation.findUnique({ where: { idempotencyKey } });
-          if (winner) return winner;
+          if (winner) return { reservation: winner, isNew: false };
 
           const roomType = await tx.roomType.findUnique({ where: { id: roomTypeId } });
           if (!roomType || !roomType.isActive) {
@@ -158,10 +159,37 @@ async function createReservation(input) {
 
           await recordHistory(tx, reservation.id, null, status, createdBy, "Booking created");
 
-          return reservation;
+          return {
+            reservation,
+            isNew: true,
+            guestUserId: guest.userId,
+            guestName: guest.fullName,
+            guestPhone: guest.phone,
+            guestEmail: guest.email,
+          };
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-      );
+      ).then(async (result) => {
+        // Published only for a genuinely new PENDING reservation, after the
+        // transaction has actually committed (not from inside it — an event
+        // sent from inside the callback could go out even if the transaction
+        // then failed to commit for some other reason). An admin's
+        // confirmImmediately booking skips this entirely — it's already
+        // CONFIRMED, no payment is coming.
+        if (result.isNew && result.reservation.status === "PENDING") {
+          await publishBookingCreated({
+            reservationId: result.reservation.id,
+            guestId: result.guestUserId,
+            guestName: result.guestName,
+            guestPhone: result.guestPhone,
+            guestEmail: result.guestEmail,
+            // booking-service stores amounts as an Int in minor units (poisha);
+            // payment-service/gateways expect major currency units (taka).
+            totalAmount: result.reservation.totalAmount / 100,
+          });
+        }
+        return result.reservation;
+      });
     } catch (err) {
       const isIdempotencyRace = err.code === "P2002" && err.meta?.target?.includes("idempotency_key");
       if (isIdempotencyRace) {
@@ -429,6 +457,36 @@ async function confirmReservation({ reservationId, actingUserId, actingRole, not
   });
 }
 
+// System-triggered confirm, called only by the "payment.succeeded" RabbitMQ
+// consumer — no actingRole gate (there's no acting user, the gateway told us
+// the guest paid). Idempotent: a redelivered/duplicate "payment.succeeded"
+// for an already-CONFIRMED reservation is a silent no-op, not an error, since
+// RabbitMQ redelivery is a normal occurrence.
+async function confirmReservationFromPayment(reservationId) {
+  return prisma.$transaction(async (tx) => {
+    const reservation = await tx.reservation.findUnique({ where: { id: reservationId } });
+    if (!reservation) {
+      console.error(`[payment.succeeded] reservation ${reservationId} not found`);
+      return null;
+    }
+
+    const allowedNext = RESERVATION_TRANSITIONS[reservation.status] || [];
+    if (!allowedNext.includes("CONFIRMED")) {
+      if (reservation.status === "CONFIRMED") return reservation; // already handled — redelivery
+      console.error(`[payment.succeeded] cannot confirm reservation ${reservationId} in ${reservation.status} status`);
+      return reservation;
+    }
+
+    const updated = await tx.reservation.update({
+      where: { id: reservationId },
+      data: { status: "CONFIRMED", holdExpiresAt: null },
+    });
+    await recordHistory(tx, reservationId, reservation.status, "CONFIRMED", "system", "Payment succeeded");
+
+    return updated;
+  });
+}
+
 // True once the no-show cut-off has passed for this reservation's check-in
 // date: always true if check-in was a previous day (cutoff is definitionally
 // behind us by then), hour-checked against NO_SHOW_CUTOFF_HOUR if check-in is
@@ -471,4 +529,12 @@ async function markNoShow({ reservationId, actingUserId, actingRole }) {
   });
 }
 
-export { createReservation, cancelReservation, modifyReservation, assignRoom, confirmReservation, markNoShow };
+export {
+  createReservation,
+  cancelReservation,
+  modifyReservation,
+  assignRoom,
+  confirmReservation,
+  confirmReservationFromPayment,
+  markNoShow,
+};

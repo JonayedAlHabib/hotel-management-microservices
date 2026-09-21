@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  reservationId   String        @unique
+  // Nullable: a walk-in/phone reservation's guest may have no auth-service
+  // account at all (booking-service's own Guest.userId is nullable for the
+  // same reason) — such a payment simply can't be "owned" by anyone via
+  // requireAuth, which is correct, since there's no online guest to own it.
+  guestId         String?
+  // Carried over from the "booking.created" event — SSLCommerz's init API
+  // requires customer name/email/phone; booking-service already has these on
+  // its Guest record, no separate lookup call needed.
+  guestName       String?
+  guestPhone      String?
+  guestEmail      String?
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("BDT")
+  // Nullable until the guest actually picks one on the checkout page — the
+  // "booking.created" event creates this row before that choice is made.
+  gateway         Gateway?
+  gatewayTranId   String?
+  status          PaymentStatus @default(INITIATED)
+  gatewayResponse Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum Gateway {
+  SSLCOMMERZ
+  BKASH
+}
+
+enum PaymentStatus {
+  INITIATED
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}

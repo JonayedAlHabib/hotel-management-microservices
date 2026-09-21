@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Payment" ALTER COLUMN "guestId" DROP NOT NULL,
+ALTER COLUMN "gateway" DROP NOT NULL;
