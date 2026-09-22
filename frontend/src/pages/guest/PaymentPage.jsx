@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
-import { CreditCard, Wallet, ShieldCheck, Lock, Headset, ArrowLeft, ArrowRight } from "lucide-react";
+import { CreditCard, Wallet, ShieldCheck, Lock, Headset, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import bookingApi from "../../api/bookingClient";
 import paymentApi from "../../api/paymentClient";
 import { formatMoney } from "../../utils/money";
@@ -232,7 +232,9 @@ function StepIndicator() {
   return (
     <div className="flex items-center gap-3 text-sm">
       <div className="flex items-center gap-2 text-forest-900/40">
-        <span className="h-6 w-6 rounded-full border-2 border-forest-900/25 flex items-center justify-center text-xs">✓</span>
+        <span className="h-6 w-6 rounded-full border-2 border-forest-900/25 flex items-center justify-center text-xs">
+          <Check size={12} />
+        </span>
         Room & Booking
       </div>
       <div className="flex-1 h-px bg-forest-900/10" />

@@ -30,4 +30,4 @@ function validateLogin(req, res, next) {
   next();
 }
 
-export { validateRegister, validateLogin };
+export { validateRegister, validateLogin, PASSWORD_RE };

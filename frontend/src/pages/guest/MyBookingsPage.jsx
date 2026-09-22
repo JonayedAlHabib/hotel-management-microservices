@@ -260,7 +260,7 @@ export default function MyBookingsPage() {
             <button
               type="button"
               onClick={() => setMobileFiltersOpen(false)}
-              className="w-full mt-5 bg-forest-900 text-white rounded-lg py-2.5 text-sm font-medium"
+              className="w-full mt-5 bg-forest-900 text-white rounded-full py-2.5 text-sm font-medium"
             >
               Show Results
             </button>

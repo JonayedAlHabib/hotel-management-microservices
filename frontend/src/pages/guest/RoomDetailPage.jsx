@@ -259,21 +259,14 @@ export default function RoomDetailPage() {
 
             <section>
               <h2 className="font-serif text-lg font-semibold text-forest-900 mb-4">Location</h2>
-              <div className="relative h-56 rounded-2xl overflow-hidden bg-forest-50 border border-forest-900/10 flex items-center justify-center">
-                <div
-                  className="absolute inset-0 opacity-40"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(90deg, rgba(26,58,46,0.08) 1px, transparent 1px), linear-gradient(0deg, rgba(26,58,46,0.08) 1px, transparent 1px)",
-                    backgroundSize: "28px 28px",
-                  }}
+              <div className="h-56 rounded-2xl overflow-hidden border border-forest-900/10">
+                <iframe
+                  title="Hotel location map"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(HOTEL_ADDRESS)}&output=embed`}
+                  className="h-full w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                 />
-                <div className="relative flex flex-col items-center gap-2 text-center px-4">
-                  <span className="h-10 w-10 rounded-full bg-forest-900 text-sand-cream flex items-center justify-center">
-                    <MapPin size={18} />
-                  </span>
-                  <p className="text-sm font-medium text-forest-900">{HOTEL_ADDRESS}</p>
-                </div>
               </div>
             </section>
           </div>

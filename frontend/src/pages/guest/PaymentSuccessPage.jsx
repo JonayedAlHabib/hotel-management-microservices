@@ -112,7 +112,7 @@ export default function PaymentSuccessPage() {
 
             <Link
               to="/my-bookings"
-              className="flex items-center justify-center gap-2 w-full bg-forest-900 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-forest-800 transition-colors"
+              className="flex items-center justify-center gap-2 w-full bg-forest-900 text-white rounded-full py-2.5 text-sm font-medium hover:bg-forest-800 transition-colors"
             >
               <LayoutDashboard size={16} />
               Go to Dashboard

@@ -4,8 +4,15 @@ import { ApiError } from "../utils/apiError.js";
 const MAX_ATTEMPTS = 5;
 const WINDOW_SECONDS = 15 * 60; // 15 minutes — matches PRD UC-G02 AC3
 
+const FORGOT_PASSWORD_MAX_ATTEMPTS = 3;
+const FORGOT_PASSWORD_WINDOW_SECONDS = 15 * 60;
+
 function attemptsKey(email) {
   return `login-attempts:${email.toLowerCase()}`;
+}
+
+function forgotPasswordKey(email) {
+  return `forgot-password-attempts:${email.toLowerCase()}`;
 }
 
 // Runs BEFORE the login controller — rejects fast if this email is already locked out,
@@ -43,4 +50,30 @@ async function clearLoginAttempts(email) {
   await redisClient.del(attemptsKey(email));
 }
 
-export { checkLoginRateLimit, recordFailedLogin, clearLoginAttempts };
+// Same pattern as checkLoginRateLimit, applied to forgot-password requests — stops
+// an attacker from hammering the endpoint to spam a victim's inbox with reset emails.
+async function checkForgotPasswordRateLimit(req, res, next) {
+  const { email } = req.body;
+  if (!email) return next();
+
+  const key = forgotPasswordKey(email);
+  const attempts = await redisClient.incr(key);
+  if (attempts === 1) {
+    await redisClient.expire(key, FORGOT_PASSWORD_WINDOW_SECONDS);
+  }
+
+  if (attempts > FORGOT_PASSWORD_MAX_ATTEMPTS) {
+    const ttl = await redisClient.ttl(key);
+    const minutes = Math.max(1, Math.ceil(ttl / 60));
+    throw new ApiError(429, `Too many reset requests. Try again in ${minutes} minute(s).`);
+  }
+
+  next();
+}
+
+export {
+  checkLoginRateLimit,
+  recordFailedLogin,
+  clearLoginAttempts,
+  checkForgotPasswordRateLimit,
+};
