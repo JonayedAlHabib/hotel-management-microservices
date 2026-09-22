@@ -34,3 +34,29 @@ export async function publishBookingCreated({
     console.error("[rabbitmq] failed to publish booking.created:", err.message);
   }
 }
+
+export async function publishBookingConfirmed({ reservationId, reference, userId, guestName, guestEmail }) {
+  try {
+    const channel = await getChannel();
+    const payload = { reservationId, reference, userId, guestName, guestEmail };
+    channel.publish(EXCHANGE_NAME, "booking.confirmed", Buffer.from(JSON.stringify(payload)), {
+      persistent: true,
+      contentType: "application/json",
+    });
+  } catch (err) {
+    console.error("[rabbitmq] failed to publish booking.confirmed:", err.message);
+  }
+}
+
+export async function publishBookingCancelled({ reservationId, reference, userId, guestName, guestEmail, reason }) {
+  try {
+    const channel = await getChannel();
+    const payload = { reservationId, reference, userId, guestName, guestEmail, reason };
+    channel.publish(EXCHANGE_NAME, "booking.cancelled", Buffer.from(JSON.stringify(payload)), {
+      persistent: true,
+      contentType: "application/json",
+    });
+  } catch (err) {
+    console.error("[rabbitmq] failed to publish booking.cancelled:", err.message);
+  }
+}

@@ -53,6 +53,19 @@ export default function HomePage() {
   const [showAllRooms, setShowAllRooms] = useState(false);
   const [amenityTab, setAmenityTab] = useState("all");
 
+  // Falls back to the static config/hotel.js constants until this resolves
+  // (or if it fails) — the Hotel Information section always has something to
+  // show, never a blank spot while loading or if booking-service is down.
+  const [hotelInfo, setHotelInfo] = useState({
+    name: HOTEL_NAME,
+    address: HOTEL_ADDRESS,
+    phone: HOTEL_PHONE,
+    email: HOTEL_EMAIL,
+    checkInTime: HOTEL_CHECK_IN,
+    checkOutTime: HOTEL_CHECK_OUT,
+    description: null,
+  });
+
   useEffect(() => {
     async function load() {
       try {
@@ -63,6 +76,27 @@ export default function HomePage() {
       }
     }
     load();
+  }, []);
+
+  useEffect(() => {
+    async function loadHotelConfig() {
+      try {
+        const res = await bookingApi.get("/hotel-config");
+        const c = res.data.data.hotelConfig;
+        setHotelInfo({
+          name: c.name,
+          address: c.address,
+          phone: c.phone,
+          email: c.email,
+          checkInTime: c.checkInTime,
+          checkOutTime: c.checkOutTime,
+          description: c.description,
+        });
+      } catch {
+        // Live config unavailable — the static fallback set above stays as-is.
+      }
+    }
+    loadHotelConfig();
   }, []);
 
   const heroPhoto = roomTypes?.find((r) => r.photos?.length)?.photos?.[0];
@@ -216,14 +250,18 @@ export default function HomePage() {
             <h2 className="font-serif text-xl font-semibold">Hotel Information</h2>
           </div>
           <p className="text-sm text-white/70 max-w-2xl mb-5">
-            {HOTEL_NAME} offers comfortable rooms, attentive service, and a convenient central location — everything
-            you need for a relaxed stay, whether you're here for a night or a week.
+            {hotelInfo.description ||
+              `${hotelInfo.name} offers comfortable rooms, attentive service, and a convenient central location — everything you need for a relaxed stay, whether you're here for a night or a week.`}
           </p>
           <div className="grid sm:grid-cols-2 gap-4 text-sm">
-            <InfoRow icon={MapPin} label="Address" value={HOTEL_ADDRESS} />
-            <InfoRow icon={Phone} label="Phone" value={HOTEL_PHONE} />
-            <InfoRow icon={Mail} label="Email" value={HOTEL_EMAIL} />
-            <InfoRow icon={Clock} label="Check-in / Check-out" value={`${HOTEL_CHECK_IN} · ${HOTEL_CHECK_OUT}`} />
+            <InfoRow icon={MapPin} label="Address" value={hotelInfo.address} />
+            <InfoRow icon={Phone} label="Phone" value={hotelInfo.phone} />
+            <InfoRow icon={Mail} label="Email" value={hotelInfo.email} />
+            <InfoRow
+              icon={Clock}
+              label="Check-in / Check-out"
+              value={`${hotelInfo.checkInTime} · ${hotelInfo.checkOutTime}`}
+            />
           </div>
         </section>
 

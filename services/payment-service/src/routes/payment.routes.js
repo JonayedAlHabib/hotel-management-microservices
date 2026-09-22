@@ -1,6 +1,10 @@
 import express from "express";
 import {
   createPaymentHandler,
+  createDepositPaymentHandler,
+  createBalancePaymentHandler,
+  listMyPaymentsHandler,
+  getInvoiceHandler,
   getPaymentHandler,
   getPaymentByReservationHandler,
   initiateCheckoutHandler,
@@ -9,14 +13,23 @@ import {
   sslcommerzCancelHandler,
   sslcommerzIpnHandler,
 } from "../controllers/payment.controller.js";
-import { validateCreatePayment, validateInitiateCheckout } from "../middleware/validate.js";
+import { validateCreatePayment, validateInitiateCheckout, validateInvoiceRequest } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = express.Router();
 
 router.post("/", requireAuth, validateCreatePayment, asyncHandler(createPaymentHandler));
+router.get("/mine", requireAuth, asyncHandler(listMyPaymentsHandler));
 router.get("/reservation/:reservationId", requireAuth, asyncHandler(getPaymentByReservationHandler));
+router.post("/reservation/:reservationId/deposit", requireAuth, asyncHandler(createDepositPaymentHandler));
+router.post("/reservation/:reservationId/balance", requireAuth, asyncHandler(createBalancePaymentHandler));
+router.post(
+  "/reservation/:reservationId/invoice",
+  requireAuth,
+  validateInvoiceRequest,
+  asyncHandler(getInvoiceHandler)
+);
 router.get("/:id", requireAuth, asyncHandler(getPaymentHandler));
 router.post("/:id/initiate", requireAuth, validateInitiateCheckout, asyncHandler(initiateCheckoutHandler));
 

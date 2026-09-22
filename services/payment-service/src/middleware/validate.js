@@ -27,7 +27,20 @@ const initiateCheckoutSchema = z.object({
   gateway: z.enum(["SSLCOMMERZ", "BKASH"]),
 });
 
+// UC-G14 invoice — shape-only validation for display text the client
+// supplies (room name/dates/nights). Never used for money: the invoice's
+// payment lines and total paid always come from this service's own DB.
+const invoiceRequestSchema = z.object({
+  reference: z.string().trim().optional(),
+  roomTypeName: z.string().trim().optional(),
+  checkIn: z.string().trim().optional(),
+  checkOut: z.string().trim().optional(),
+  nights: z.number().int().positive().optional(),
+  guestCount: z.number().int().positive().optional(),
+});
+
 const validateCreatePayment = runSchema(createPaymentSchema);
 const validateInitiateCheckout = runSchema(initiateCheckoutSchema);
+const validateInvoiceRequest = runSchema(invoiceRequestSchema);
 
-export { validateCreatePayment, validateInitiateCheckout };
+export { validateCreatePayment, validateInitiateCheckout, validateInvoiceRequest };

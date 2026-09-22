@@ -1,21 +1,30 @@
 import { Prisma } from "../generated/prisma/index.js";
 import { prisma } from "../db/prisma.js";
 import { ApiError } from "../utils/apiError.js";
-import { publishBookingCreated } from "../mq/publisher.js";
+import { publishBookingCreated, publishBookingConfirmed, publishBookingCancelled } from "../mq/publisher.js";
 import { checkAvailability } from "./availability.service.js";
 import { todayInHotelTimezone, currentHourInHotelTimezone } from "../utils/date.js";
 import {
   HOLD_DURATION_MINUTES,
-  TAX_RATE_BP,
   RESERVATION_TRANSITIONS,
   MAX_PENDING_PER_GUEST,
   MIN_STAY_NIGHTS,
   MAX_STAY_NIGHTS,
   EDITABLE_RESERVATION_STATUSES,
   NO_SHOW_CUTOFF_HOUR,
+  FREE_CANCELLATION_HOURS_BEFORE_CHECKIN,
+  CANCELLATION_FEE_NIGHTS,
 } from "../config/constants.js";
 
 const MAX_RETRIES = 3;
+
+// HotelConfig is a singleton row (see prisma/schema.prisma) — the single
+// source of truth for the tax rate, read live instead of a hardcoded constant.
+async function getTaxRateBp(client) {
+  const config = await client.hotelConfig.findFirst();
+  if (!config) throw new ApiError(500, "Hotel configuration is not set up");
+  return config.taxRateBp;
+}
 
 async function findOrCreateGuest(tx, { userId, guestName, guestPhone, guestEmail }) {
   if (userId) {
@@ -125,7 +134,8 @@ async function createReservation(input) {
           // BR-03: room charge = nights x rate; no service charges yet (folio is a later phase)
           const nights = Math.round((checkOut - checkIn) / 86400000);
           const subtotal = nights * roomType.basePrice;
-          const tax = Math.round((subtotal * TAX_RATE_BP) / 10000);
+          const taxRateBp = await getTaxRateBp(tx);
+          const tax = Math.round((subtotal * taxRateBp) / 10000);
           const totalAmount = subtotal + tax;
 
           // UC-A: admin can confirm a walk-in/phone booking immediately, skipping the payment hold
@@ -150,7 +160,7 @@ async function createReservation(input) {
               status,
               source: source ?? "ONLINE",
               rateSnapshot: roomType.basePrice,
-              taxRateBp: TAX_RATE_BP,
+              taxRateBp,
               totalAmount,
               holdExpiresAt,
               createdBy,
@@ -205,6 +215,16 @@ async function createReservation(input) {
   }
 }
 
+// UC-G11 / A-04: free cancellation until 48h before check-in; inside that
+// window, a fee of the first CANCELLATION_FEE_NIGHTS night(s), priced at the
+// reservation's own rateSnapshot (not the room type's current rate — same
+// "snapshot is the quote" reasoning modifyReservation uses for the total).
+function calculateCancellationFee(reservation) {
+  const hoursUntilCheckIn = (reservation.checkIn.getTime() - Date.now()) / (60 * 60 * 1000);
+  if (hoursUntilCheckIn >= FREE_CANCELLATION_HOURS_BEFORE_CHECKIN) return 0;
+  return reservation.rateSnapshot * CANCELLATION_FEE_NIGHTS;
+}
+
 // BR-09: a non-owner gets 404, never 403 — existence of another guest's
 // reservation is not revealed. Cancellation window itself is deliberately
 // simple (before check-in) — the PRD lists the real window/fee as an open
@@ -217,7 +237,9 @@ async function cancelReservation({ reservationId, actingUserId, actingRole, reas
     throw new ApiError(400, "reason is required when an admin cancels a reservation");
   }
 
-  return prisma.$transaction(async (tx) => {
+  let guestForEvent = null;
+
+  const updated = await prisma.$transaction(async (tx) => {
     const reservation = await tx.reservation.findUnique({
       where: { id: reservationId },
       include: { guest: true },
@@ -239,9 +261,11 @@ async function cancelReservation({ reservationId, actingUserId, actingRole, reas
       throw new ApiError(409, "Cannot cancel on or after the check-in date");
     }
 
-    const updated = await tx.reservation.update({
+    const cancellationFeeAmount = calculateCancellationFee(reservation);
+
+    const updatedReservation = await tx.reservation.update({
       where: { id: reservationId },
-      data: { status: "CANCELLED" },
+      data: { status: "CANCELLED", cancellationFeeAmount },
     });
     await recordHistory(
       tx,
@@ -251,8 +275,23 @@ async function cancelReservation({ reservationId, actingUserId, actingRole, reas
       actingUserId,
       reason ? `${reason} (cancelled by ${actingRole})` : `Cancelled by ${actingRole}`
     );
-    return updated;
+
+    guestForEvent = reservation.guest;
+    return updatedReservation;
   });
+
+  // Published only after the transaction has actually committed — same
+  // reasoning createReservation already uses for booking.created.
+  await publishBookingCancelled({
+    reservationId: updated.id,
+    reference: updated.reference,
+    userId: guestForEvent.userId,
+    guestName: guestForEvent.fullName,
+    guestEmail: guestForEvent.email,
+    reason,
+  });
+
+  return updated;
 }
 
 function fieldChange(field, oldValue, newValue) {
@@ -329,7 +368,8 @@ async function modifyReservation(input) {
           }
 
           const subtotal = nights * roomType.basePrice;
-          const tax = Math.round((subtotal * TAX_RATE_BP) / 10000);
+          const taxRateBp = await getTaxRateBp(tx);
+          const tax = Math.round((subtotal * taxRateBp) / 10000);
           const newTotalAmount = subtotal + tax;
 
           const changes = [];
@@ -438,8 +478,13 @@ async function confirmReservation({ reservationId, actingUserId, actingRole, not
     throw new ApiError(403, "Only an admin can confirm a reservation");
   }
 
-  return prisma.$transaction(async (tx) => {
-    const reservation = await tx.reservation.findUnique({ where: { id: reservationId } });
+  let guestForEvent = null;
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const reservation = await tx.reservation.findUnique({
+      where: { id: reservationId },
+      include: { guest: true },
+    });
     if (!reservation) throw new ApiError(404, "Reservation not found");
 
     const allowedNext = RESERVATION_TRANSITIONS[reservation.status] || [];
@@ -447,14 +492,25 @@ async function confirmReservation({ reservationId, actingUserId, actingRole, not
       throw new ApiError(409, `Cannot confirm a reservation in ${reservation.status} status`);
     }
 
-    const updated = await tx.reservation.update({
+    const updatedReservation = await tx.reservation.update({
       where: { id: reservationId },
       data: { status: "CONFIRMED", holdExpiresAt: null },
     });
     await recordHistory(tx, reservationId, reservation.status, "CONFIRMED", actingUserId, note ?? "Confirmed by admin");
 
-    return updated;
+    guestForEvent = reservation.guest;
+    return updatedReservation;
   });
+
+  await publishBookingConfirmed({
+    reservationId: updated.id,
+    reference: updated.reference,
+    userId: guestForEvent.userId,
+    guestName: guestForEvent.fullName,
+    guestEmail: guestForEvent.email,
+  });
+
+  return updated;
 }
 
 // System-triggered confirm, called only by the "payment.succeeded" RabbitMQ
@@ -463,8 +519,13 @@ async function confirmReservation({ reservationId, actingUserId, actingRole, not
 // for an already-CONFIRMED reservation is a silent no-op, not an error, since
 // RabbitMQ redelivery is a normal occurrence.
 async function confirmReservationFromPayment(reservationId) {
-  return prisma.$transaction(async (tx) => {
-    const reservation = await tx.reservation.findUnique({ where: { id: reservationId } });
+  let guestForEvent = null;
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const reservation = await tx.reservation.findUnique({
+      where: { id: reservationId },
+      include: { guest: true },
+    });
     if (!reservation) {
       console.error(`[payment.succeeded] reservation ${reservationId} not found`);
       return null;
@@ -477,14 +538,30 @@ async function confirmReservationFromPayment(reservationId) {
       return reservation;
     }
 
-    const updated = await tx.reservation.update({
+    const updatedReservation = await tx.reservation.update({
       where: { id: reservationId },
       data: { status: "CONFIRMED", holdExpiresAt: null },
     });
     await recordHistory(tx, reservationId, reservation.status, "CONFIRMED", "system", "Payment succeeded");
 
-    return updated;
+    guestForEvent = reservation.guest;
+    return updatedReservation;
   });
+
+  // guestForEvent only gets set on a genuinely fresh confirm — the
+  // already-CONFIRMED (redelivery) and can't-confirm no-op paths above leave
+  // it null, so a redelivered payment.succeeded never double-publishes.
+  if (guestForEvent) {
+    await publishBookingConfirmed({
+      reservationId: updated.id,
+      reference: updated.reference,
+      userId: guestForEvent.userId,
+      guestName: guestForEvent.fullName,
+      guestEmail: guestForEvent.email,
+    });
+  }
+
+  return updated;
 }
 
 // True once the no-show cut-off has passed for this reservation's check-in

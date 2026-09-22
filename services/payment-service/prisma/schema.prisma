@@ -8,9 +8,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// reservationId is deliberately NOT unique — UC-G13 deposit/balance support
+// means more than one Payment row can belong to the same reservation (a
+// DEPOSIT row, then later a BALANCE row; or just one FULL row, unchanged
+// from before). handleGatewayResult's idempotency is keyed on Payment.id
+// (this row's own PK, via the gateway's tran_id), never on reservationId, so
+// nothing about that guarantee changes by allowing multiple rows here.
 model Payment {
   id              String        @id @default(uuid())
-  reservationId   String        @unique
+  reservationId   String
   // Nullable: a walk-in/phone reservation's guest may have no auth-service
   // account at all (booking-service's own Guest.userId is nullable for the
   // same reason) — such a payment simply can't be "owned" by anyone via
@@ -24,6 +30,10 @@ model Payment {
   guestEmail      String?
   amount          Decimal       @db.Decimal(10, 2)
   currency        String        @default("BDT")
+  // FULL (default): the original one-row-per-reservation behavior, created by
+  // the booking.created consumer — untouched. DEPOSIT/BALANCE: UC-G13,
+  // created explicitly via POST /payments/reservation/:id/deposit|balance.
+  type            PaymentType   @default(FULL)
   // Nullable until the guest actually picks one on the checkout page — the
   // "booking.created" event creates this row before that choice is made.
   gateway         Gateway?
@@ -32,11 +42,19 @@ model Payment {
   gatewayResponse Json?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  @@index([reservationId])
 }
 
 enum Gateway {
   SSLCOMMERZ
   BKASH
+}
+
+enum PaymentType {
+  FULL
+  DEPOSIT
+  BALANCE
 }
 
 enum PaymentStatus {

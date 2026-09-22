@@ -18,6 +18,18 @@ export function publishPaymentSucceeded(payment) {
     paymentId: payment.id,
     status: "SUCCESS",
     gatewayTranId: payment.gatewayTranId,
+    // UC-G13: DEPOSIT/BALANCE/FULL — booking-service's consumer doesn't
+    // branch on this today (confirmReservationFromPayment is already
+    // idempotent regardless of amount/type), but it's here for any future
+    // consumer that wants to tell a deposit-confirmation apart from a
+    // balance-settlement one.
+    type: payment.type,
+    // additive — notification-service needs these for a PAYMENT_CONFIRMED
+    // notification; booking-service's existing consumer only reads
+    // reservationId/status and ignores unknown fields, unaffected.
+    guestId: payment.guestId,
+    guestName: payment.guestName,
+    guestEmail: payment.guestEmail,
   });
 }
 

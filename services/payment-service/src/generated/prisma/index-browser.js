@@ -131,6 +131,7 @@ exports.Prisma.PaymentScalarFieldEnum = {
   guestEmail: 'guestEmail',
   amount: 'amount',
   currency: 'currency',
+  type: 'type',
   gateway: 'gateway',
   gatewayTranId: 'gatewayTranId',
   status: 'status',
@@ -164,6 +165,12 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.PaymentType = exports.$Enums.PaymentType = {
+  FULL: 'FULL',
+  DEPOSIT: 'DEPOSIT',
+  BALANCE: 'BALANCE'
+};
+
 exports.Gateway = exports.$Enums.Gateway = {
   SSLCOMMERZ: 'SSLCOMMERZ',
   BKASH: 'BKASH'

@@ -1,13 +1,17 @@
-// MVP-fixed business values. The PRD calls tax rate and hold time "configurable"
-// (a future hotel-configuration table), but that table doesn't exist yet — these
-// constants are the stand-in until it does.
-export const TAX_RATE_BP = 500; // 5.00% — BR-03
+// MVP-fixed business values. The PRD calls tax rate "configurable" too, but
+// that one now lives in the HotelConfig table (see reservation.service.js) —
+// HOLD_DURATION_MINUTES stays here since nothing asked to move it.
 export const HOLD_DURATION_MINUTES = 30; // BR: "default 30 minutes"
 export const MAX_STAY_NIGHTS = 30;
 export const MIN_STAY_NIGHTS = 1;
 export const MAX_PENDING_PER_GUEST = 3; // US-G09.2 AC5 — "at most 3 unpaid PENDING bookings at the same time"
 export const NO_SHOW_CUTOFF_HOUR = 23; // UC-A12: "no-show cut-off time (default 23:00)", hotel local time
 export const PAGE_SIZE = 20; // UC-A08.1: "Results are paginated (20 per page)"
+
+// UC-G11 / PRD assumption A-04: free cancellation until 48h before check-in;
+// after that, a fee of the first CANCELLATION_FEE_NIGHTS night(s) applies.
+export const FREE_CANCELLATION_HOURS_BEFORE_CHECKIN = 48;
+export const CANCELLATION_FEE_NIGHTS = 1;
 
 // UC-A10.1 AC1 / US-A10.2 AC2: modify and room-assignment are both only
 // allowed while a reservation is in one of these statuses.

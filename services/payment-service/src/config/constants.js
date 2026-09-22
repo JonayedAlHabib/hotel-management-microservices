@@ -13,3 +13,8 @@ export const PAYMENT_TRANSITIONS = {
   CANCELLED: ["PENDING"],
   REFUNDED: [],
 };
+
+// UC-G13: a guest may pay a deposit instead of the full amount upfront —
+// 30% of the reservation total. The remaining balance is paid later as its
+// own separate Payment row (type BALANCE).
+export const DEPOSIT_PERCENT_BP = 3000; // 30.00%

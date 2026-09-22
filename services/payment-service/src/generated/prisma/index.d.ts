@@ -23,7 +23,16 @@ export type Payment = $Result.DefaultSelection<Prisma.$PaymentPayload>
  * Enums
  */
 export namespace $Enums {
-  export const Gateway: {
+  export const PaymentType: {
+  FULL: 'FULL',
+  DEPOSIT: 'DEPOSIT',
+  BALANCE: 'BALANCE'
+};
+
+export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType]
+
+
+export const Gateway: {
   SSLCOMMERZ: 'SSLCOMMERZ',
   BKASH: 'BKASH'
 };
@@ -43,6 +52,10 @@ export const PaymentStatus: {
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 }
+
+export type PaymentType = $Enums.PaymentType
+
+export const PaymentType: typeof $Enums.PaymentType
 
 export type Gateway = $Enums.Gateway
 
@@ -905,6 +918,7 @@ export namespace Prisma {
     guestEmail: string | null
     amount: Decimal | null
     currency: string | null
+    type: $Enums.PaymentType | null
     gateway: $Enums.Gateway | null
     gatewayTranId: string | null
     status: $Enums.PaymentStatus | null
@@ -921,6 +935,7 @@ export namespace Prisma {
     guestEmail: string | null
     amount: Decimal | null
     currency: string | null
+    type: $Enums.PaymentType | null
     gateway: $Enums.Gateway | null
     gatewayTranId: string | null
     status: $Enums.PaymentStatus | null
@@ -937,6 +952,7 @@ export namespace Prisma {
     guestEmail: number
     amount: number
     currency: number
+    type: number
     gateway: number
     gatewayTranId: number
     status: number
@@ -964,6 +980,7 @@ export namespace Prisma {
     guestEmail?: true
     amount?: true
     currency?: true
+    type?: true
     gateway?: true
     gatewayTranId?: true
     status?: true
@@ -980,6 +997,7 @@ export namespace Prisma {
     guestEmail?: true
     amount?: true
     currency?: true
+    type?: true
     gateway?: true
     gatewayTranId?: true
     status?: true
@@ -996,6 +1014,7 @@ export namespace Prisma {
     guestEmail?: true
     amount?: true
     currency?: true
+    type?: true
     gateway?: true
     gatewayTranId?: true
     status?: true
@@ -1100,6 +1119,7 @@ export namespace Prisma {
     guestEmail: string | null
     amount: Decimal
     currency: string
+    type: $Enums.PaymentType
     gateway: $Enums.Gateway | null
     gatewayTranId: string | null
     status: $Enums.PaymentStatus
@@ -1136,6 +1156,7 @@ export namespace Prisma {
     guestEmail?: boolean
     amount?: boolean
     currency?: boolean
+    type?: boolean
     gateway?: boolean
     gatewayTranId?: boolean
     status?: boolean
@@ -1153,6 +1174,7 @@ export namespace Prisma {
     guestEmail?: boolean
     amount?: boolean
     currency?: boolean
+    type?: boolean
     gateway?: boolean
     gatewayTranId?: boolean
     status?: boolean
@@ -1170,6 +1192,7 @@ export namespace Prisma {
     guestEmail?: boolean
     amount?: boolean
     currency?: boolean
+    type?: boolean
     gateway?: boolean
     gatewayTranId?: boolean
     status?: boolean
@@ -1191,6 +1214,7 @@ export namespace Prisma {
       guestEmail: string | null
       amount: Prisma.Decimal
       currency: string
+      type: $Enums.PaymentType
       gateway: $Enums.Gateway | null
       gatewayTranId: string | null
       status: $Enums.PaymentStatus
@@ -1598,6 +1622,7 @@ export namespace Prisma {
     readonly guestEmail: FieldRef<"Payment", 'String'>
     readonly amount: FieldRef<"Payment", 'Decimal'>
     readonly currency: FieldRef<"Payment", 'String'>
+    readonly type: FieldRef<"Payment", 'PaymentType'>
     readonly gateway: FieldRef<"Payment", 'Gateway'>
     readonly gatewayTranId: FieldRef<"Payment", 'String'>
     readonly status: FieldRef<"Payment", 'PaymentStatus'>
@@ -1915,6 +1940,7 @@ export namespace Prisma {
     guestEmail: 'guestEmail',
     amount: 'amount',
     currency: 'currency',
+    type: 'type',
     gateway: 'gateway',
     gatewayTranId: 'gatewayTranId',
     status: 'status',
@@ -2001,6 +2027,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PaymentType'
+   */
+  export type EnumPaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentType'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentType[]'
+   */
+  export type ListEnumPaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentType[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Gateway'
    */
   export type EnumGatewayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gateway'>
@@ -2078,6 +2118,7 @@ export namespace Prisma {
     guestEmail?: StringNullableFilter<"Payment"> | string | null
     amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     currency?: StringFilter<"Payment"> | string
+    type?: EnumPaymentTypeFilter<"Payment"> | $Enums.PaymentType
     gateway?: EnumGatewayNullableFilter<"Payment"> | $Enums.Gateway | null
     gatewayTranId?: StringNullableFilter<"Payment"> | string | null
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
@@ -2095,6 +2136,7 @@ export namespace Prisma {
     guestEmail?: SortOrderInput | SortOrder
     amount?: SortOrder
     currency?: SortOrder
+    type?: SortOrder
     gateway?: SortOrderInput | SortOrder
     gatewayTranId?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -2105,23 +2147,24 @@ export namespace Prisma {
 
   export type PaymentWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    reservationId?: string
     AND?: PaymentWhereInput | PaymentWhereInput[]
     OR?: PaymentWhereInput[]
     NOT?: PaymentWhereInput | PaymentWhereInput[]
+    reservationId?: StringFilter<"Payment"> | string
     guestId?: StringNullableFilter<"Payment"> | string | null
     guestName?: StringNullableFilter<"Payment"> | string | null
     guestPhone?: StringNullableFilter<"Payment"> | string | null
     guestEmail?: StringNullableFilter<"Payment"> | string | null
     amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     currency?: StringFilter<"Payment"> | string
+    type?: EnumPaymentTypeFilter<"Payment"> | $Enums.PaymentType
     gateway?: EnumGatewayNullableFilter<"Payment"> | $Enums.Gateway | null
     gatewayTranId?: StringNullableFilter<"Payment"> | string | null
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
     gatewayResponse?: JsonNullableFilter<"Payment">
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
-  }, "id" | "reservationId">
+  }, "id">
 
   export type PaymentOrderByWithAggregationInput = {
     id?: SortOrder
@@ -2132,6 +2175,7 @@ export namespace Prisma {
     guestEmail?: SortOrderInput | SortOrder
     amount?: SortOrder
     currency?: SortOrder
+    type?: SortOrder
     gateway?: SortOrderInput | SortOrder
     gatewayTranId?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -2157,6 +2201,7 @@ export namespace Prisma {
     guestEmail?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     amount?: DecimalWithAggregatesFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     currency?: StringWithAggregatesFilter<"Payment"> | string
+    type?: EnumPaymentTypeWithAggregatesFilter<"Payment"> | $Enums.PaymentType
     gateway?: EnumGatewayNullableWithAggregatesFilter<"Payment"> | $Enums.Gateway | null
     gatewayTranId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     status?: EnumPaymentStatusWithAggregatesFilter<"Payment"> | $Enums.PaymentStatus
@@ -2174,6 +2219,7 @@ export namespace Prisma {
     guestEmail?: string | null
     amount: Decimal | DecimalJsLike | number | string
     currency?: string
+    type?: $Enums.PaymentType
     gateway?: $Enums.Gateway | null
     gatewayTranId?: string | null
     status?: $Enums.PaymentStatus
@@ -2191,6 +2237,7 @@ export namespace Prisma {
     guestEmail?: string | null
     amount: Decimal | DecimalJsLike | number | string
     currency?: string
+    type?: $Enums.PaymentType
     gateway?: $Enums.Gateway | null
     gatewayTranId?: string | null
     status?: $Enums.PaymentStatus
@@ -2208,6 +2255,7 @@ export namespace Prisma {
     guestEmail?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: StringFieldUpdateOperationsInput | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     gateway?: NullableEnumGatewayFieldUpdateOperationsInput | $Enums.Gateway | null
     gatewayTranId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
@@ -2225,6 +2273,7 @@ export namespace Prisma {
     guestEmail?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: StringFieldUpdateOperationsInput | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     gateway?: NullableEnumGatewayFieldUpdateOperationsInput | $Enums.Gateway | null
     gatewayTranId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
@@ -2242,6 +2291,7 @@ export namespace Prisma {
     guestEmail?: string | null
     amount: Decimal | DecimalJsLike | number | string
     currency?: string
+    type?: $Enums.PaymentType
     gateway?: $Enums.Gateway | null
     gatewayTranId?: string | null
     status?: $Enums.PaymentStatus
@@ -2259,6 +2309,7 @@ export namespace Prisma {
     guestEmail?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: StringFieldUpdateOperationsInput | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     gateway?: NullableEnumGatewayFieldUpdateOperationsInput | $Enums.Gateway | null
     gatewayTranId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
@@ -2276,6 +2327,7 @@ export namespace Prisma {
     guestEmail?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: StringFieldUpdateOperationsInput | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     gateway?: NullableEnumGatewayFieldUpdateOperationsInput | $Enums.Gateway | null
     gatewayTranId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
@@ -2323,6 +2375,13 @@ export namespace Prisma {
     gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type EnumPaymentTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeFilter<$PrismaModel> | $Enums.PaymentType
   }
 
   export type EnumGatewayNullableFilter<$PrismaModel = never> = {
@@ -2386,6 +2445,7 @@ export namespace Prisma {
     guestEmail?: SortOrder
     amount?: SortOrder
     currency?: SortOrder
+    type?: SortOrder
     gateway?: SortOrder
     gatewayTranId?: SortOrder
     status?: SortOrder
@@ -2407,6 +2467,7 @@ export namespace Prisma {
     guestEmail?: SortOrder
     amount?: SortOrder
     currency?: SortOrder
+    type?: SortOrder
     gateway?: SortOrder
     gatewayTranId?: SortOrder
     status?: SortOrder
@@ -2423,6 +2484,7 @@ export namespace Prisma {
     guestEmail?: SortOrder
     amount?: SortOrder
     currency?: SortOrder
+    type?: SortOrder
     gateway?: SortOrder
     gatewayTranId?: SortOrder
     status?: SortOrder
@@ -2484,6 +2546,16 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type EnumPaymentTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeWithAggregatesFilter<$PrismaModel> | $Enums.PaymentType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentTypeFilter<$PrismaModel>
+    _max?: NestedEnumPaymentTypeFilter<$PrismaModel>
   }
 
   export type EnumGatewayNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -2561,6 +2633,10 @@ export namespace Prisma {
     divide?: Decimal | DecimalJsLike | number | string
   }
 
+  export type EnumPaymentTypeFieldUpdateOperationsInput = {
+    set?: $Enums.PaymentType
+  }
+
   export type NullableEnumGatewayFieldUpdateOperationsInput = {
     set?: $Enums.Gateway | null
   }
@@ -2610,6 +2686,13 @@ export namespace Prisma {
     gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type NestedEnumPaymentTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeFilter<$PrismaModel> | $Enums.PaymentType
   }
 
   export type NestedEnumGatewayNullableFilter<$PrismaModel = never> = {
@@ -2707,6 +2790,16 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPaymentTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeWithAggregatesFilter<$PrismaModel> | $Enums.PaymentType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentTypeFilter<$PrismaModel>
+    _max?: NestedEnumPaymentTypeFilter<$PrismaModel>
   }
 
   export type NestedEnumGatewayNullableWithAggregatesFilter<$PrismaModel = never> = {

@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// UC-G19 — one row per notification actually delivered to a guest's in-app
+// list. Keyed on userId (auth-service's JWT `sub`), not booking-service's
+// Guest.id — a walk-in guest with no userId can never log in to see this
+// list anyway, so the consumer skips creating a row for one.
+model Notification {
+  id              String           @id @default(uuid())
+  userId          String           @map("user_id")
+  type            NotificationType
+  title           String
+  message         String
+  // reservationId or paymentId — never joined against another service's DB
+  // (database-per-service), purely informational for the client.
+  relatedEntityId String?          @map("related_entity_id")
+  read            Boolean          @default(false)
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// BOOKING_CONFIRMED/BOOKING_CANCELLED/PAYMENT_CONFIRMED are the only types
+// wired to a real event this pass. CHECKIN_REMINDER/CHECKOUT_REMINDER/
+// SERVICE_REQUEST_UPDATE are reserved slots for features that don't exist
+// yet (check-in, service requests) — adding them later is additive to this
+// enum and to EVENT_HANDLERS in notification.service.js, no redesign needed.
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  PAYMENT_CONFIRMED
+  CHECKIN_REMINDER
+  CHECKOUT_REMINDER
+  SERVICE_REQUEST_UPDATE
+}

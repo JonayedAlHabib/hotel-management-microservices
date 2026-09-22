@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Bell, ChevronDown, Settings, LogOut } from "lucide-react";
+import { Menu, X, Search, ChevronDown, Settings, LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import LogoutModal from "./components/LogoutModal";
+import NotificationsDropdown from "./components/NotificationsDropdown";
 import { HOTEL_NAME } from "../../config/hotel";
 import logo from "../../assets/Logo.jpg";
 
@@ -71,7 +72,7 @@ export default function GuestLayout() {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 shrink-0 md:ml-4 ml-auto">
-            <Bell size={18} className="text-forest-900/40" />
+            <NotificationsDropdown />
 
             <div className="relative" ref={avatarMenuRef}>
               <button

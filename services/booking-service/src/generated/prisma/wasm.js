@@ -175,6 +175,7 @@ exports.Prisma.ReservationScalarFieldEnum = {
   taxRateBp: 'taxRateBp',
   totalAmount: 'totalAmount',
   holdExpiresAt: 'holdExpiresAt',
+  cancellationFeeAmount: 'cancellationFeeAmount',
   createdBy: 'createdBy',
   createdAt: 'createdAt'
 };
@@ -207,6 +208,21 @@ exports.Prisma.RoomStatusHistoryScalarFieldEnum = {
   changedBy: 'changedBy',
   note: 'note',
   changedAt: 'changedAt'
+};
+
+exports.Prisma.HotelConfigScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  address: 'address',
+  phone: 'phone',
+  email: 'email',
+  checkInTime: 'checkInTime',
+  checkOutTime: 'checkOutTime',
+  cancellationPolicy: 'cancellationPolicy',
+  taxRateBp: 'taxRateBp',
+  amenities: 'amenities',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -266,7 +282,8 @@ exports.Prisma.ModelName = {
   Reservation: 'Reservation',
   ReservationStatusHistory: 'ReservationStatusHistory',
   ReservationChangeLog: 'ReservationChangeLog',
-  RoomStatusHistory: 'RoomStatusHistory'
+  RoomStatusHistory: 'RoomStatusHistory',
+  HotelConfig: 'HotelConfig'
 };
 
 /**

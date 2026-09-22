@@ -1,11 +1,16 @@
 import { ApiResponse } from "../utils/apiResponse.js";
 import {
   createPayment,
+  createDepositPayment,
+  createBalancePayment,
+  listMyPayments,
+  getInvoiceData,
   getPaymentById,
   getPaymentByReservationId,
   initiateCheckout,
   handleGatewayResult,
 } from "../services/payment.service.js";
+import { renderInvoice } from "../utils/invoice.js";
 
 // POST /payments — manual create for testing this step; step 2 replaces this
 // entry point with the "booking.created" RabbitMQ consumer. guestId always
@@ -31,6 +36,42 @@ async function getPaymentByReservationHandler(req, res) {
     role: req.user.role,
   });
   res.json(new ApiResponse(200, { payment }, payment ? "Fetched payment" : "Payment not created yet"));
+}
+
+// POST /payments/reservation/:reservationId/deposit — UC-G13
+async function createDepositPaymentHandler(req, res) {
+  const payment = await createDepositPayment(req.params.reservationId, {
+    guestId: req.user.id,
+    role: req.user.role,
+  });
+  res.status(201).json(new ApiResponse(201, { payment }, "Deposit payment ready"));
+}
+
+// POST /payments/reservation/:reservationId/balance — UC-G13
+async function createBalancePaymentHandler(req, res) {
+  const payment = await createBalancePayment(req.params.reservationId, {
+    guestId: req.user.id,
+    role: req.user.role,
+  });
+  res.status(201).json(new ApiResponse(201, { payment }, "Balance payment ready"));
+}
+
+// GET /payments/mine?reservationId= — UC-G14
+async function listMyPaymentsHandler(req, res) {
+  const payments = await listMyPayments(req.user.id, { reservationId: req.query.reservationId });
+  res.json(new ApiResponse(200, { payments }, "Fetched payment history"));
+}
+
+// POST /payments/reservation/:reservationId/invoice — UC-G14, streams a PDF
+async function getInvoiceHandler(req, res) {
+  const payments = await getInvoiceData(req.params.reservationId, {
+    guestId: req.user.id,
+    role: req.user.role,
+  });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="invoice-${req.params.reservationId}.pdf"`);
+  renderInvoice(res, { booking: req.body, payments });
 }
 
 // POST /payments/:id/initiate — GUEST (owner) or ADMIN
@@ -92,6 +133,10 @@ async function sslcommerzIpnHandler(req, res) {
 
 export {
   createPaymentHandler,
+  createDepositPaymentHandler,
+  createBalancePaymentHandler,
+  listMyPaymentsHandler,
+  getInvoiceHandler,
   getPaymentHandler,
   getPaymentByReservationHandler,
   initiateCheckoutHandler,

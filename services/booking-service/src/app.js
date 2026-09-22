@@ -22,12 +22,14 @@ import roomTypeRoutes from "./routes/roomType.routes.js";
 import roomRoutes from "./routes/room.routes.js";
 import availabilityRoutes from "./routes/availability.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
+import hotelConfigRoutes from "./routes/hotelConfig.routes.js";
 
 // Router Declaration
 app.use("/room-types", roomTypeRoutes);
 app.use("/rooms", roomRoutes);
 app.use("/availability", availabilityRoutes);
 app.use("/bookings", bookingRoutes);
+app.use("/hotel-config", hotelConfigRoutes);
 
 app.use((err, req, res, next) => {
   // multer throws its own error type for things like "file too large" —

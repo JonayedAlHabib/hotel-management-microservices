@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, BedDouble, Users, CalendarDays } from "lucide-react";
+import { Search, SlidersHorizontal, BedDouble, Users, CalendarDays, CreditCard, Receipt, ChevronDown, ChevronUp } from "lucide-react";
 import bookingApi from "../../api/bookingClient";
 import { formatMoney } from "../../utils/money";
 import BookingFilters from "./components/BookingFilters";
+import CancelBookingModal from "./components/CancelBookingModal";
+import PayNowModal from "./components/PayNowModal";
+import PaymentsPanel from "./components/PaymentsPanel";
 
 const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
 
@@ -60,6 +63,9 @@ export default function MyBookingsPage() {
   const [roomTypePhotos, setRoomTypePhotos] = useState({}); // roomTypeId -> photo url
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null); // reservation being confirmed for cancel
+  const [payTarget, setPayTarget] = useState(null); // reservation being paid via PayNowModal
+  const [expandedPayments, setExpandedPayments] = useState(null); // reservation id with PaymentsPanel open
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [search, setSearch] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -129,12 +135,17 @@ export default function MyBookingsPage() {
     loadPhotos();
   }, []);
 
-  async function handleCancel(id) {
-    if (!window.confirm("Cancel this booking?")) return;
+  async function handleConfirmCancel(reason) {
+    const id = cancelTarget.id;
     setCancellingId(id);
     try {
-      await bookingApi.patch(`/bookings/${id}/cancel`, {});
+      await bookingApi.patch(`/bookings/${id}/cancel`, reason ? { reason } : {});
       setReservations(await fetchReservations());
+      setCancelTarget(null);
+      // Cancellation fee/refund-due for this one booking is shown via its own
+      // PaymentsPanel (UC-G11 AC3) — open it automatically so the guest sees
+      // the outcome without an extra click.
+      setExpandedPayments(id);
     } catch (err) {
       setError(err.response?.data?.message || "Could not cancel this booking");
     } finally {
@@ -143,6 +154,10 @@ export default function MyBookingsPage() {
   }
 
   const canCancel = (r) => ["PENDING", "CONFIRMED"].includes(r.status) && new Date() < new Date(r.checkIn);
+  // UC-G13 — the only window a fresh/retry payment is meaningful: still
+  // PENDING and the 30-minute hold hasn't expired yet (past that, the sweep
+  // job flips it to EXPIRED and it's genuinely no longer payable).
+  const canPay = (r) => r.status === "PENDING" && r.holdExpiresAt && new Date() < new Date(r.holdExpiresAt);
 
   const roomTypeOptions = useMemo(() => {
     if (!reservations) return [];
@@ -239,13 +254,31 @@ export default function MyBookingsPage() {
                 r={r}
                 photoUrl={roomTypePhotos[r.roomTypeId]}
                 canCancel={canCancel(r)}
+                canPay={canPay(r)}
                 cancelling={cancellingId === r.id}
-                onCancel={handleCancel}
+                onCancel={() => setCancelTarget(r)}
+                onPay={() => setPayTarget(r)}
+                paymentsOpen={expandedPayments === r.id}
+                onTogglePayments={() => setExpandedPayments(expandedPayments === r.id ? null : r.id)}
               />
             ))}
           </div>
         </div>
       </div>
+
+      {cancelTarget && (
+        <CancelBookingModal
+          reservation={cancelTarget}
+          open={Boolean(cancelTarget)}
+          submitting={cancellingId === cancelTarget.id}
+          onCancel={() => setCancelTarget(null)}
+          onConfirm={handleConfirmCancel}
+        />
+      )}
+
+      {payTarget && (
+        <PayNowModal reservation={payTarget} open={Boolean(payTarget)} onClose={() => setPayTarget(null)} />
+      )}
 
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -271,58 +304,87 @@ export default function MyBookingsPage() {
   );
 }
 
-function BookingCard({ r, photoUrl, canCancel, cancelling, onCancel }) {
+function BookingCard({ r, photoUrl, canCancel, canPay, cancelling, onCancel, onPay, paymentsOpen, onTogglePayments }) {
   const bucket = statusBucket(r);
   const bucketLabel = bucket.charAt(0) + bucket.slice(1).toLowerCase();
 
   return (
-    <div className="bg-white rounded-2xl border border-forest-900/10 p-4 flex flex-col sm:flex-row gap-4">
-      <div className="h-40 sm:h-24 sm:w-32 shrink-0 rounded-xl overflow-hidden bg-forest-50">
-        {photoUrl ? (
-          <img src={`${BOOKING_API_URL}${photoUrl}`} alt={r.roomType.name} className="h-full w-full object-cover" />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center text-forest-200">
-            <BedDouble size={26} />
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-semibold text-forest-900">{r.roomType.name}</p>
-            <span
-              className={`text-xs font-medium border rounded-full px-2.5 py-0.5 whitespace-nowrap ${STATUS_BUCKET_STYLES[bucket]}`}
-            >
-              {bucketLabel}
-            </span>
-          </div>
-          <p className="text-xs text-forest-900/50 mt-1">{r.reference}</p>
-          <div className="flex items-center gap-3 text-xs text-forest-900/50 mt-1.5 flex-wrap">
-            <span className="flex items-center gap-1">
-              <CalendarDays size={13} />
-              {dateOnly(r.checkIn)} → {dateOnly(r.checkOut)}
-            </span>
-            <span className="flex items-center gap-1">
-              <Users size={13} />
-              {r.guestCount} guest{r.guestCount > 1 ? "s" : ""}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0">
-          <p className="font-semibold text-forest-900 text-sm">{formatMoney(r.totalAmount)}</p>
-          {canCancel && (
-            <button
-              onClick={() => onCancel(r.id)}
-              disabled={cancelling}
-              className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
-            >
-              {cancelling ? "Cancelling…" : "Cancel Booking"}
-            </button>
+    <div className="bg-white rounded-2xl border border-forest-900/10 p-4 space-y-3">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="h-40 sm:h-24 sm:w-32 shrink-0 rounded-xl overflow-hidden bg-forest-50">
+          {photoUrl ? (
+            <img src={`${BOOKING_API_URL}${photoUrl}`} alt={r.roomType.name} className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-forest-200">
+              <BedDouble size={26} />
+            </div>
           )}
         </div>
+
+        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-semibold text-forest-900">{r.roomType.name}</p>
+              <span
+                className={`text-xs font-medium border rounded-full px-2.5 py-0.5 whitespace-nowrap ${STATUS_BUCKET_STYLES[bucket]}`}
+              >
+                {bucketLabel}
+              </span>
+            </div>
+            <p className="text-xs text-forest-900/50 mt-1">{r.reference}</p>
+            <div className="flex items-center gap-3 text-xs text-forest-900/50 mt-1.5 flex-wrap">
+              <span className="flex items-center gap-1">
+                <CalendarDays size={13} />
+                {dateOnly(r.checkIn)} → {dateOnly(r.checkOut)}
+              </span>
+              <span className="flex items-center gap-1">
+                <Users size={13} />
+                {r.guestCount} guest{r.guestCount > 1 ? "s" : ""}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0">
+            <p className="font-semibold text-forest-900 text-sm">{formatMoney(r.totalAmount)}</p>
+            <div className="flex items-center gap-3">
+              {canPay && (
+                <button
+                  onClick={onPay}
+                  className="flex items-center gap-1 text-xs font-medium bg-forest-900 text-white rounded-full px-3 py-1.5 hover:bg-forest-800"
+                >
+                  <CreditCard size={13} />
+                  Pay Now
+                </button>
+              )}
+              {canCancel && (
+                <button
+                  onClick={onCancel}
+                  disabled={cancelling}
+                  className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                >
+                  {cancelling ? "Cancelling…" : "Cancel Booking"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onTogglePayments}
+        className="flex items-center gap-1.5 text-xs font-medium text-forest-900/60 hover:text-forest-900"
+      >
+        <Receipt size={13} />
+        Payments & Invoice
+        {paymentsOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </button>
+
+      {paymentsOpen && (
+        <div className="border-t border-forest-900/10 pt-3">
+          <PaymentsPanel reservation={r} />
+        </div>
+      )}
     </div>
   );
 }

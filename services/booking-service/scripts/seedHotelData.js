@@ -83,7 +83,32 @@ const ROOM_TYPES = [
   },
 ];
 
+// Matches frontend/src/config/hotel.js and RoomDetailPage.jsx's hardcoded
+// cancellation text exactly, since those two files stay static (see
+// PROGRESS.md) — this is the live copy HomePage.jsx reads from instead.
+const HOTEL_CONFIG = {
+  name: "The Royal Snooze",
+  description:
+    "The Royal Snooze offers comfortable rooms, attentive service, and a convenient central location — everything you need for a relaxed stay, whether you're here for a night or a week.",
+  address: "123 Gulshan Avenue, Dhaka, Bangladesh",
+  phone: "+880 1700-000000",
+  email: "info@royalsnooze.com",
+  checkInTime: "14:00",
+  checkOutTime: "12:00",
+  cancellationPolicy: "Free cancellation any time before check-in.",
+  taxRateBp: 500, // 5.00% — BR-03, previously the TAX_RATE_BP constant
+};
+
 async function main() {
+  const existingConfig = await prisma.hotelConfig.findFirst();
+  if (existingConfig) {
+    await prisma.hotelConfig.update({ where: { id: existingConfig.id }, data: HOTEL_CONFIG });
+    console.log(`Hotel config: updated (${existingConfig.id})`);
+  } else {
+    const created = await prisma.hotelConfig.create({ data: HOTEL_CONFIG });
+    console.log(`Hotel config: created (${created.id})`);
+  }
+
   for (const rt of ROOM_TYPES) {
     const roomType = await prisma.roomType.upsert({
       where: { name: rt.name },

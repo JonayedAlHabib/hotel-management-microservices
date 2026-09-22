@@ -56,6 +56,7 @@ export default function PaymentPage() {
   const state = location.state;
 
   const [method, setMethod] = useState(null);
+  const [payOption, setPayOption] = useState("FULL"); // UC-G13: FULL or DEPOSIT
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState("idle"); // idle | booking | starting-payment | redirecting
@@ -89,9 +90,15 @@ export default function PaymentPage() {
       const reservation = bookingRes.data.data.reservation;
 
       setStep("starting-payment");
-      const payment = await waitForPayment(reservation.id);
+      const fullPayment = await waitForPayment(reservation.id);
 
-      const initiateRes = await paymentApi.post(`/payments/${payment.id}/initiate`, { gateway: method });
+      let paymentToInitiate = fullPayment;
+      if (payOption === "DEPOSIT") {
+        const depositRes = await paymentApi.post(`/payments/reservation/${reservation.id}/deposit`);
+        paymentToInitiate = depositRes.data.data.payment;
+      }
+
+      const initiateRes = await paymentApi.post(`/payments/${paymentToInitiate.id}/initiate`, { gateway: method });
       const gatewayPageURL = initiateRes.data.data.gatewayPageURL;
       if (!gatewayPageURL) {
         throw new Error("Payment gateway did not return a checkout page");
@@ -163,6 +170,36 @@ export default function PaymentPage() {
               {!method && <p className="text-xs text-forest-900/50">Select a payment method to continue.</p>}
             </div>
 
+            <div className="bg-white rounded-2xl border border-forest-900/10 p-6 space-y-3">
+              <h2 className="font-serif text-lg font-semibold text-forest-900">How much would you like to pay now?</h2>
+              <div className="space-y-2">
+                <label
+                  className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
+                    payOption === "FULL" ? "border-sand-gold bg-forest-50" : "border-forest-900/10 hover:border-forest-900/20"
+                  }`}
+                >
+                  <input type="radio" name="payOption" checked={payOption === "FULL"} onChange={() => setPayOption("FULL")} />
+                  <span>
+                    <span className="block text-sm font-semibold text-forest-900">Pay Full Amount</span>
+                    <span className="block text-xs text-forest-900/50">{formatMoney(estimatedSubtotal)}</span>
+                  </span>
+                </label>
+                <label
+                  className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
+                    payOption === "DEPOSIT" ? "border-sand-gold bg-forest-50" : "border-forest-900/10 hover:border-forest-900/20"
+                  }`}
+                >
+                  <input type="radio" name="payOption" checked={payOption === "DEPOSIT"} onChange={() => setPayOption("DEPOSIT")} />
+                  <span>
+                    <span className="block text-sm font-semibold text-forest-900">Pay 30% Deposit</span>
+                    <span className="block text-xs text-forest-900/50">
+                      {formatMoney(Math.round(estimatedSubtotal * 0.3))} now — remaining balance due later
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
             <div className="bg-white rounded-2xl border border-forest-900/10 p-5 grid sm:grid-cols-3 gap-4 text-sm">
               <SecurityRow icon={Lock} title="100% Secure" body="Your payment details stay with our gateway partner" />
               <SecurityRow icon={ShieldCheck} title="Encrypted" body="Every transaction is protected end-to-end" />
@@ -193,9 +230,15 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            <div className="border-t border-forest-900/10 pt-3 flex justify-between font-semibold text-forest-900">
-              <span>Total</span>
-              <span>{formatMoney(estimatedSubtotal)}</span>
+            <div className="border-t border-forest-900/10 pt-3 space-y-1">
+              <div className="flex justify-between text-sm text-forest-900/70">
+                <span>Booking Total</span>
+                <span>{formatMoney(estimatedSubtotal)}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-forest-900">
+                <span>Due Now</span>
+                <span>{formatMoney(payOption === "DEPOSIT" ? Math.round(estimatedSubtotal * 0.3) : estimatedSubtotal)}</span>
+              </div>
             </div>
 
             <div className="flex flex-col gap-2 pt-2">
