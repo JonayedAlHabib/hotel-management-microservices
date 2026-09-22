@@ -2,6 +2,7 @@ import express from "express";
 import {
   createPaymentHandler,
   getPaymentHandler,
+  getPaymentByReservationHandler,
   initiateCheckoutHandler,
   sslcommerzSuccessHandler,
   sslcommerzFailHandler,
@@ -15,6 +16,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const router = express.Router();
 
 router.post("/", requireAuth, validateCreatePayment, asyncHandler(createPaymentHandler));
+router.get("/reservation/:reservationId", requireAuth, asyncHandler(getPaymentByReservationHandler));
 router.get("/:id", requireAuth, asyncHandler(getPaymentHandler));
 router.post("/:id/initiate", requireAuth, validateInitiateCheckout, asyncHandler(initiateCheckoutHandler));
 

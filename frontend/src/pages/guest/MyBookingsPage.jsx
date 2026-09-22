@@ -1,22 +1,35 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Search, SlidersHorizontal, BedDouble, Users, CalendarDays } from "lucide-react";
 import bookingApi from "../../api/bookingClient";
 import { formatMoney } from "../../utils/money";
+import BookingFilters from "./components/BookingFilters";
 
-const STATUS_STYLES = {
-  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
-  CONFIRMED: "bg-green-50 text-green-700 border-green-200",
-  CANCELLED: "bg-navy-50 text-navy-400 border-navy-100",
-  EXPIRED: "bg-navy-50 text-navy-400 border-navy-100",
-  NO_SHOW: "bg-red-50 text-red-700 border-red-200",
+const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+
+const PAYMENT_BANNER_STYLES = {
+  success: "text-green-700 bg-green-50 border-green-200",
+  failed: "text-red-600 bg-red-50 border-red-200",
+  cancelled: "text-amber-700 bg-amber-50 border-amber-200",
 };
 
-const TABS = [
-  { key: "ALL", label: "All Bookings" },
-  { key: "COMPLETED", label: "Completed" },
-  { key: "CANCELLED", label: "Cancelled" },
-  { key: "UPCOMING", label: "Upcoming" },
-];
+const PAYMENT_BANNER_TEXT = {
+  success: "Payment successful — your booking is confirmed.",
+  failed: "Payment failed. You can retry from the booking below.",
+  cancelled: "Payment was cancelled. You can retry from the booking below.",
+};
+
+// The 5-value backend enum (PENDING/CONFIRMED/CANCELLED/EXPIRED/NO_SHOW)
+// collapsed into the 3 display buckets this page's cards show, per the
+// design spec — PENDING/CONFIRMED-not-yet-checked-out reads as "Upcoming"
+// (matches the payment-gating change: a PENDING reservation is one still
+// waiting on payment, not yet a confirmed stay, but it's still something the
+// guest is waiting on, not something that's over).
+const STATUS_BUCKET_STYLES = {
+  UPCOMING: "bg-forest-50 text-forest-800 border-forest-200",
+  COMPLETED: "bg-sand-100 text-forest-900/70 border-forest-900/10",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
+};
 
 function dateOnly(iso) {
   return iso.slice(0, 10);
@@ -30,24 +43,58 @@ function isCompleted(r) {
   return r.status === "CONFIRMED" && new Date(r.checkOut) < new Date();
 }
 
-function matchesTab(r, tab) {
-  if (tab === "ALL") return true;
-  if (tab === "CANCELLED") return ["CANCELLED", "EXPIRED", "NO_SHOW"].includes(r.status);
-  if (tab === "UPCOMING") return isUpcoming(r);
-  if (tab === "COMPLETED") return isCompleted(r);
-  return true;
+function statusBucket(r) {
+  if (isUpcoming(r)) return "UPCOMING";
+  if (isCompleted(r)) return "COMPLETED";
+  return "CANCELLED"; // CANCELLED, EXPIRED, NO_SHOW, or a PENDING hold that's simply expired
 }
+
+const DEFAULT_FILTERS = { status: "ALL", checkInFrom: "", checkInTo: "", roomTypeName: "" };
 
 export default function MyBookingsPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const justBooked = location.state?.justBooked;
 
   const [reservations, setReservations] = useState(null);
+  const [roomTypePhotos, setRoomTypePhotos] = useState({}); // roomTypeId -> photo url
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
-  const [tab, setTab] = useState("ALL");
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [search, setSearch] = useState("");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Captured once from the URL on mount, then the query string is cleared —
+  // this keeps the banner visible across that cleanup instead of it
+  // disappearing the instant the ?payment= param is stripped.
+  const [paymentOutcome] = useState(() => new URLSearchParams(location.search).get("payment"));
+
+  useEffect(() => {
+    if (!paymentOutcome) return;
+
+    // payment-service's own browser-redirect targets are hardcoded to
+    // `/my-bookings?payment=...` server-side (out of scope to change here —
+    // see PaymentPage.jsx) — a "success" outcome is handed off to the
+    // dedicated PaymentSuccessPage via a client-side navigate rather than
+    // shown as just another inline banner on this list. failed/cancelled
+    // stay here as banners, since the guest still needs this list to retry.
+    if (paymentOutcome === "success") {
+      const reservationId = new URLSearchParams(location.search).get("reservationId");
+      navigate(`/payment-success?reservationId=${reservationId || ""}`, { replace: true });
+      return;
+    }
+
+    navigate(location.pathname, { replace: true, state: location.state });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function fetchReservations() {
+    // No status/date/roomType params sent here — GET /bookings already
+    // scopes a non-admin caller to `guest.userId === req.user.id` server-side
+    // (booking-service's reservation.controller.js), so a GUEST token can
+    // only ever get their own reservations back regardless of what's asked
+    // for. Filtering below is purely a client-side view over that same,
+    // already-owner-scoped list — never a second, wider fetch.
     const res = await bookingApi.get("/bookings");
     return res.data.data.reservations;
   }
@@ -61,6 +108,25 @@ export default function MyBookingsPage() {
       }
     }
     load();
+  }, []);
+
+  // GET /room-types is public and already used on the homepage — reused here
+  // only to look up each room type's first photo (GET /bookings doesn't
+  // include photos in its roomType include), never for booking data itself.
+  useEffect(() => {
+    async function loadPhotos() {
+      try {
+        const res = await bookingApi.get("/room-types");
+        const map = {};
+        res.data.data.roomTypes.forEach((rt) => {
+          if (rt.photos?.[0]) map[rt.id] = rt.photos[0].url;
+        });
+        setRoomTypePhotos(map);
+      } catch {
+        // Photos are decorative — a failure here shouldn't block the booking list itself.
+      }
+    }
+    loadPhotos();
   }, []);
 
   async function handleCancel(id) {
@@ -78,117 +144,184 @@ export default function MyBookingsPage() {
 
   const canCancel = (r) => ["PENDING", "CONFIRMED"].includes(r.status) && new Date() < new Date(r.checkIn);
 
-  const visible = reservations?.filter((r) => matchesTab(r, tab));
-  const upcoming = tab === "ALL" ? visible?.filter(isUpcoming) : null;
-  const history = tab === "ALL" ? visible?.filter((r) => !isUpcoming(r)) : visible;
+  const roomTypeOptions = useMemo(() => {
+    if (!reservations) return [];
+    return [...new Set(reservations.map((r) => r.roomType.name))].sort();
+  }, [reservations]);
+
+  const visible = useMemo(() => {
+    if (!reservations) return null;
+    const term = search.trim().toLowerCase();
+    return reservations.filter((r) => {
+      if (filters.status !== "ALL" && statusBucket(r) !== filters.status) return false;
+      if (filters.roomTypeName && r.roomType.name !== filters.roomTypeName) return false;
+      if (filters.checkInFrom && dateOnly(r.checkIn) < filters.checkInFrom) return false;
+      if (filters.checkInTo && dateOnly(r.checkIn) > filters.checkInTo) return false;
+      if (term && !`${r.reference} ${r.roomType.name}`.toLowerCase().includes(term)) return false;
+      return true;
+    });
+  }, [reservations, filters, search]);
+
+  const filtersActive =
+    filters.status !== "ALL" || filters.checkInFrom || filters.checkInTo || filters.roomTypeName;
 
   return (
-    <div className="w-full px-6 py-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-navy-900">My Booking</h1>
-        <p className="text-sm text-navy-400 mt-1">Manage and track all your hotel reservations</p>
+    <div className="w-full bg-sand-cream min-h-full">
+      <div className="flex">
+        <aside className="hidden lg:block w-72 shrink-0 border-r border-forest-900/10 bg-white px-5 py-6">
+          <BookingFilters filters={filters} onChange={setFilters} roomTypeOptions={roomTypeOptions} />
+        </aside>
+
+        <div className="flex-1 min-w-0 px-4 sm:px-6 py-6 space-y-5">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <h1 className="font-serif text-2xl font-semibold text-forest-900">My Bookings</h1>
+              <p className="text-sm text-forest-900/50 mt-1">Manage and track all your hotel reservations</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-forest-900/40" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by reference or room..."
+                  className="pl-9 pr-3 py-2 border border-forest-900/15 rounded-lg text-sm w-56 focus:outline-none focus:ring-2 focus:ring-sand-gold/40 focus:border-sand-gold"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(true)}
+                className="lg:hidden relative flex items-center gap-1.5 border border-forest-900/15 rounded-lg px-3 py-2 text-sm font-medium text-forest-900"
+              >
+                <SlidersHorizontal size={15} />
+                Filters
+                {filtersActive && <span className="h-1.5 w-1.5 rounded-full bg-sand-gold absolute -top-0.5 -right-0.5" />}
+              </button>
+            </div>
+          </div>
+
+          {justBooked && (
+            <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+              Booking {justBooked} created — it holds your room for 30 minutes.
+            </div>
+          )}
+          {paymentOutcome && (
+            <div
+              className={`text-sm border rounded-lg px-3 py-2 ${PAYMENT_BANNER_STYLES[paymentOutcome] || "text-forest-900/70 bg-forest-50 border-forest-100"}`}
+            >
+              {PAYMENT_BANNER_TEXT[paymentOutcome] || "Payment status updated."}
+            </div>
+          )}
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
+          )}
+
+          {reservations === null && !error && <p className="text-sm text-forest-900/50">Loading…</p>}
+
+          {visible && (
+            <p className="text-xs text-forest-900/40">
+              Showing {visible.length} of {reservations.length} booking{reservations.length === 1 ? "" : "s"}
+            </p>
+          )}
+
+          {visible?.length === 0 && (
+            <p className="text-sm text-forest-900/50 bg-white border border-forest-900/10 rounded-xl px-4 py-8 text-center">
+              No bookings match these filters.
+            </p>
+          )}
+
+          <div className="space-y-3">
+            {visible?.map((r) => (
+              <BookingCard
+                key={r.id}
+                r={r}
+                photoUrl={roomTypePhotos[r.roomTypeId]}
+                canCancel={canCancel(r)}
+                cancelling={cancellingId === r.id}
+                onCancel={handleCancel}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="flex gap-2 bg-white border border-navy-100 rounded-full p-1 w-fit">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              tab === t.key ? "bg-navy-800 text-white" : "text-navy-500 hover:text-navy-800"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {justBooked && (
-        <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-          Booking {justBooked} created — it holds your room for 30 minutes.
-        </div>
-      )}
-      {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
-      )}
-
-      {reservations === null && !error && <p className="text-sm text-navy-400">Loading…</p>}
-      {visible?.length === 0 && <p className="text-sm text-navy-400">No bookings here yet.</p>}
-
-      {upcoming && upcoming.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-navy-900">Upcoming Stays</h2>
-          {upcoming.map((r) => (
-            <UpcomingCard key={r.id} r={r} canCancel={canCancel(r)} cancelling={cancellingId === r.id} onCancel={handleCancel} />
-          ))}
-        </div>
-      )}
-
-      {history && history.length > 0 && (
-        <div className="space-y-3">
-          {tab === "ALL" && <h2 className="text-sm font-semibold text-navy-900">Booking History</h2>}
-          {history.map((r) => (
-            <HistoryRow key={r.id} r={r} canCancel={canCancel(r)} cancelling={cancellingId === r.id} onCancel={handleCancel} />
-          ))}
+      {mobileFiltersOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-forest-950/50" onClick={() => setMobileFiltersOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-[85%] max-w-xs bg-white p-5 overflow-y-auto">
+            <BookingFilters
+              filters={filters}
+              onChange={setFilters}
+              roomTypeOptions={roomTypeOptions}
+              onClose={() => setMobileFiltersOpen(false)}
+            />
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(false)}
+              className="w-full mt-5 bg-forest-900 text-white rounded-lg py-2.5 text-sm font-medium"
+            >
+              Show Results
+            </button>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-function UpcomingCard({ r, canCancel, cancelling, onCancel }) {
-  return (
-    <div className="bg-white rounded-2xl border border-navy-100 p-5 flex items-start justify-between gap-4">
-      <div className="flex items-start gap-4">
-        <div className="h-16 w-16 rounded-xl bg-navy-50 flex items-center justify-center text-2xl shrink-0">🏨</div>
-        <div>
-          <p className="font-semibold text-navy-900">{r.roomType.name}</p>
-          <p className="text-sm text-navy-400">
-            {r.reference} · {dateOnly(r.checkIn)} → {dateOnly(r.checkOut)} · {r.guestCount} guest(s)
-          </p>
-          <p className="text-sm text-navy-600 mt-1">{formatMoney(r.totalAmount)}</p>
-        </div>
-      </div>
-      <div className="flex flex-col items-end gap-2 shrink-0">
-        <span className={`text-xs font-medium border rounded-full px-2.5 py-1 whitespace-nowrap ${STATUS_STYLES[r.status] || ""}`}>
-          {r.status}
-        </span>
-        {canCancel && (
-          <button
-            onClick={() => onCancel(r.id)}
-            disabled={cancelling}
-            className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
-          >
-            {cancelling ? "Cancelling…" : "Cancel Booking"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+function BookingCard({ r, photoUrl, canCancel, cancelling, onCancel }) {
+  const bucket = statusBucket(r);
+  const bucketLabel = bucket.charAt(0) + bucket.slice(1).toLowerCase();
 
-function HistoryRow({ r, canCancel, cancelling, onCancel }) {
   return (
-    <div className="bg-white rounded-2xl border border-navy-100 p-4 flex items-center justify-between gap-4">
-      <div>
-        <p className="font-medium text-navy-900 text-sm">{r.roomType.name}</p>
-        <p className="text-xs text-navy-400">
-          {r.reference} · {dateOnly(r.checkIn)} → {dateOnly(r.checkOut)}
-        </p>
-      </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className={`text-xs font-medium border rounded-full px-2.5 py-1 whitespace-nowrap ${STATUS_STYLES[r.status] || ""}`}>
-          {r.status}
-        </span>
-        {canCancel && (
-          <button
-            onClick={() => onCancel(r.id)}
-            disabled={cancelling}
-            className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
-          >
-            {cancelling ? "…" : "Cancel"}
-          </button>
+    <div className="bg-white rounded-2xl border border-forest-900/10 p-4 flex flex-col sm:flex-row gap-4">
+      <div className="h-40 sm:h-24 sm:w-32 shrink-0 rounded-xl overflow-hidden bg-forest-50">
+        {photoUrl ? (
+          <img src={`${BOOKING_API_URL}${photoUrl}`} alt={r.roomType.name} className="h-full w-full object-cover" />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-forest-200">
+            <BedDouble size={26} />
+          </div>
         )}
+      </div>
+
+      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-semibold text-forest-900">{r.roomType.name}</p>
+            <span
+              className={`text-xs font-medium border rounded-full px-2.5 py-0.5 whitespace-nowrap ${STATUS_BUCKET_STYLES[bucket]}`}
+            >
+              {bucketLabel}
+            </span>
+          </div>
+          <p className="text-xs text-forest-900/50 mt-1">{r.reference}</p>
+          <div className="flex items-center gap-3 text-xs text-forest-900/50 mt-1.5 flex-wrap">
+            <span className="flex items-center gap-1">
+              <CalendarDays size={13} />
+              {dateOnly(r.checkIn)} → {dateOnly(r.checkOut)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Users size={13} />
+              {r.guestCount} guest{r.guestCount > 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0">
+          <p className="font-semibold text-forest-900 text-sm">{formatMoney(r.totalAmount)}</p>
+          {canCancel && (
+            <button
+              onClick={() => onCancel(r.id)}
+              disabled={cancelling}
+              className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+            >
+              {cancelling ? "Cancelling…" : "Cancel Booking"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

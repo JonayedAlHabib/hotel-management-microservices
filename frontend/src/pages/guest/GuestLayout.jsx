@@ -5,7 +5,7 @@ import LogoutModal from "./components/LogoutModal";
 import { HOTEL_NAME, HOTEL_INITIAL } from "../../config/hotel";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Home", end: true, icon: "🏠" },
+  { to: "/home", label: "Home", end: true, icon: "🏠" },
   { to: "/rooms", label: "Rooms", icon: "🛏️" },
   { to: "/my-bookings", label: "My Booking", icon: "📖" },
 ];

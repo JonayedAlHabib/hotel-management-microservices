@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { HOTEL_NAME } from "../config/hotel";
+import AuthSplitLayout from "../components/AuthSplitLayout";
+import loungePhoto from "../assets/hero/lounge.jpg";
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -23,13 +28,14 @@ export default function RegisterPage() {
 
     try {
       await register(form);
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       const data = err.response?.data;
       setError(data?.message || "Something went wrong");
 
       // backend sends { errors: [{ field, message }] } for validation failures (UC-G01) —
-      // turn that array into a lookup so each input can show its own message
+      // turn that array into a lookup so each input can show its own message, exactly
+      // as the API worded it, rather than a generic one written here.
       if (Array.isArray(data?.errors)) {
         const mapped = {};
         data.errors.forEach((fe) => {
@@ -43,20 +49,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-navy-900 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-5"
-      >
-        <div>
-          <h1 className="text-xl font-semibold text-navy-900">Create an account</h1>
-          <p className="text-sm text-navy-400 mt-1">Register to book a room.</p>
-        </div>
+    <AuthSplitLayout
+      photo={loungePhoto}
+      quote="Every stay starts with a warm welcome — create your account and let's get you settled in."
+      quoteAuthor={HOTEL_NAME}
+    >
+      <h1 className="font-serif text-2xl font-semibold text-forest-900">Create an Account</h1>
+      <p className="text-sm text-forest-900/50 mt-1 mb-6">Register to start booking your stay</p>
 
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            {error}
-          </div>
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
         )}
 
         <Field label="Full name" name="name" value={form.name} onChange={handleChange} error={fieldErrors.name} />
@@ -68,45 +71,59 @@ export default function RegisterPage() {
           onChange={handleChange}
           error={fieldErrors.email}
         />
-        <Field label="Phone" name="phone" value={form.phone} onChange={handleChange} />
-        <Field
-          label="Password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          error={fieldErrors.password}
-        />
+        <Field label="Phone" name="phone" value={form.phone} onChange={handleChange} error={fieldErrors.phone} />
+
+        <div>
+          <label className="block text-sm font-medium text-forest-900/80 mb-1">Password</label>
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={handleChange}
+              className="w-full border border-forest-900/15 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-sand-gold/40 focus:border-sand-gold"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-forest-900/40 hover:text-forest-900"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </button>
+          </div>
+          {fieldErrors.password && <p className="text-xs text-red-600 mt-1">{fieldErrors.password}</p>}
+        </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-navy-700 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-navy-800 disabled:opacity-50"
+          className="w-full bg-forest-900 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-forest-800 disabled:opacity-50 transition-colors"
         >
           {submitting ? "Creating account…" : "Create account"}
         </button>
 
-        <p className="text-sm text-navy-500 text-center">
+        <p className="text-sm text-forest-900/60 text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-bronze-600 font-medium hover:text-bronze-700">
+          <Link to="/login" className="text-forest-900 font-semibold hover:underline">
             Log in
           </Link>
         </p>
       </form>
-    </div>
+    </AuthSplitLayout>
   );
 }
 
 function Field({ label, name, type = "text", value, onChange, error }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-navy-800 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-forest-900/80 mb-1">{label}</label>
       <input
         name={name}
         type={type}
         value={value}
         onChange={onChange}
-        className="w-full border border-navy-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bronze-400/40 focus:border-bronze-400"
+        className="w-full border border-forest-900/15 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sand-gold/40 focus:border-sand-gold"
       />
       {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
     </div>

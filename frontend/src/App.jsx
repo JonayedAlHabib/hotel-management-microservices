@@ -1,14 +1,17 @@
 import { Routes, Route } from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import PublicHomePage from "./pages/public/PublicHomePage";
 
 import GuestLayout from "./pages/guest/GuestLayout";
 import HomePage from "./pages/guest/HomePage";
 import RoomsPage from "./pages/guest/RoomsPage";
 import RoomDetailPage from "./pages/guest/RoomDetailPage";
-import BookingPage from "./pages/guest/BookingPage";
 import PaymentPage from "./pages/guest/PaymentPage";
+import PaymentSuccessPage from "./pages/guest/PaymentSuccessPage";
 import MyBookingsPage from "./pages/guest/MyBookingsPage";
 import GuestSettingsPage from "./pages/guest/SettingsPage";
 
@@ -24,8 +27,10 @@ import AdminSettingsPage from "./pages/admin/SettingsPage";
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<PublicHomePage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       <Route
         element={
@@ -34,11 +39,11 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/rooms/:id" element={<RoomDetailPage />} />
-        <Route path="/rooms/:roomTypeId/book" element={<BookingPage />} />
         <Route path="/rooms/:roomTypeId/payment" element={<PaymentPage />} />
+        <Route path="/payment-success" element={<PaymentSuccessPage />} />
         <Route path="/my-bookings" element={<MyBookingsPage />} />
         <Route path="/settings" element={<GuestSettingsPage />} />
       </Route>

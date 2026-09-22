@@ -60,6 +60,22 @@ async function getPaymentById(id, { guestId, role }) {
   return payment;
 }
 
+// Lets the frontend find the Payment row created asynchronously by the
+// "booking.created" consumer — all it has after POST /bookings is the
+// reservationId, never the payment's own id. Same ownership rule as
+// getPaymentById; a null return (not found yet) is expected while the
+// consumer hasn't processed the event, the caller polls for it.
+async function getPaymentByReservationId(reservationId, { guestId, role }) {
+  const payment = await prisma.payment.findUnique({ where: { reservationId } });
+  if (!payment) return null;
+
+  if (role !== "ADMIN" && payment.guestId !== guestId) {
+    return null;
+  }
+
+  return payment;
+}
+
 // POST /payments/:id/initiate — only SSLCommerz is wired up right now (bKash
 // deliberately deferred). Allowed from INITIATED (first attempt) or from
 // FAILED/CANCELLED (retry, same row — see PAYMENT_TRANSITIONS) via the same
@@ -146,6 +162,7 @@ export {
   createPayment,
   createPaymentFromBookingEvent,
   getPaymentById,
+  getPaymentByReservationId,
   initiateCheckout,
   handleGatewayResult,
 };

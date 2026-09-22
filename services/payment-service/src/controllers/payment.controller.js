@@ -2,6 +2,7 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import {
   createPayment,
   getPaymentById,
+  getPaymentByReservationId,
   initiateCheckout,
   handleGatewayResult,
 } from "../services/payment.service.js";
@@ -19,6 +20,17 @@ async function createPaymentHandler(req, res) {
 async function getPaymentHandler(req, res) {
   const payment = await getPaymentById(req.params.id, { guestId: req.user.id, role: req.user.role });
   res.json(new ApiResponse(200, { payment }, "Fetched payment"));
+}
+
+// GET /payments/reservation/:reservationId — payment is `null` (200, not 404)
+// while the "booking.created" consumer hasn't created the row yet; the
+// frontend polls this until it appears.
+async function getPaymentByReservationHandler(req, res) {
+  const payment = await getPaymentByReservationId(req.params.reservationId, {
+    guestId: req.user.id,
+    role: req.user.role,
+  });
+  res.json(new ApiResponse(200, { payment }, payment ? "Fetched payment" : "Payment not created yet"));
 }
 
 // POST /payments/:id/initiate — GUEST (owner) or ADMIN
@@ -81,6 +93,7 @@ async function sslcommerzIpnHandler(req, res) {
 export {
   createPaymentHandler,
   getPaymentHandler,
+  getPaymentByReservationHandler,
   initiateCheckoutHandler,
   sslcommerzSuccessHandler,
   sslcommerzFailHandler,
