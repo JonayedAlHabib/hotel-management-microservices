@@ -31,6 +31,14 @@ const EVENT_HANDLERS = {
     relatedEntityId: event.reservationId,
     email: event.guestEmail,
   }),
+  "payment.failed": (event) => ({
+    userId: event.guestId,
+    type: "PAYMENT_FAILED",
+    title: "Payment failed",
+    message: `Your payment attempt for reservation ${event.reservationId} wasn't successful. Please try again.`,
+    relatedEntityId: event.reservationId,
+    email: event.guestEmail,
+  }),
 };
 
 // Skipped, not an error, when the event carries no userId — a walk-in/phone

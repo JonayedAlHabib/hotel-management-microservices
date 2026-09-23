@@ -3,10 +3,10 @@ import { createNotificationFromEvent } from "../../services/notification.service
 
 const QUEUE_NAME = "notification_service.events";
 
-// Three separate bindings, not one wildcard — "booking.created" and
-// "payment.failed" are deliberately NOT bound (out of scope this pass, see
-// PROGRESS.md), so a "booking.*"/"payment.*" wildcard would over-match.
-const ROUTING_KEYS = ["booking.confirmed", "booking.cancelled", "payment.succeeded"];
+// Explicit bindings, not one wildcard — "booking.created" is deliberately
+// NOT bound (out of scope, see PROGRESS.md), so a "booking.*"/"payment.*"
+// wildcard would over-match.
+const ROUTING_KEYS = ["booking.confirmed", "booking.cancelled", "payment.succeeded", "payment.failed"];
 
 export async function startNotificationEventsConsumer() {
   const channel = await getChannel();

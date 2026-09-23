@@ -38,5 +38,10 @@ export function publishPaymentFailed(payment) {
     reservationId: payment.reservationId,
     paymentId: payment.id,
     status: payment.status, // FAILED or CANCELLED — booking-service currently treats both as "do nothing, let the guest retry"
+    // additive — same reasoning as publishPaymentSucceeded: notification-service
+    // needs these for a PAYMENT_FAILED notification.
+    guestId: payment.guestId,
+    guestName: payment.guestName,
+    guestEmail: payment.guestEmail,
   });
 }

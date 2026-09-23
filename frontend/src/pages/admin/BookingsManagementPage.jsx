@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import bookingApi from "../../api/bookingClient";
 import { formatMoney } from "../../utils/money";
+import CancelReasonModal from "./components/CancelReasonModal";
 
 const STATUS_STYLES = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",
@@ -21,6 +22,7 @@ export default function BookingsManagementPage() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [actingId, setActingId] = useState(null);
+  const [cancelTargetId, setCancelTargetId] = useState(null);
 
   async function fetchReservations() {
     const res = await bookingApi.get("/bookings", {
@@ -71,12 +73,12 @@ export default function BookingsManagementPage() {
     }
   }
 
-  async function handleCancel(id) {
-    const reason = window.prompt("Reason for cancellation (required for admin cancellations):");
-    if (reason === null) return;
+  async function handleCancelConfirm(reason) {
+    const id = cancelTargetId;
     setActingId(id);
     try {
       await bookingApi.patch(`/bookings/${id}/cancel`, { reason });
+      setCancelTargetId(null);
       await load();
     } catch (err) {
       setError(err.response?.data?.message || "Could not cancel this booking");
@@ -190,7 +192,7 @@ export default function BookingsManagementPage() {
                       )}
                       {["PENDING", "CONFIRMED"].includes(r.status) && (
                         <button
-                          onClick={() => handleCancel(r.id)}
+                          onClick={() => setCancelTargetId(r.id)}
                           disabled={actingId === r.id}
                           className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
                         >
@@ -229,6 +231,13 @@ export default function BookingsManagementPage() {
           </div>
         )}
       </div>
+
+      <CancelReasonModal
+        open={cancelTargetId !== null}
+        submitting={actingId === cancelTargetId}
+        onCancel={() => setCancelTargetId(null)}
+        onConfirm={handleCancelConfirm}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ const TYPE_LABELS = {
   BOOKING_CONFIRMED: "Booking confirmed",
   BOOKING_CANCELLED: "Booking cancelled",
   PAYMENT_CONFIRMED: "Payment received",
+  PAYMENT_FAILED: "Payment failed",
   CHECKIN_REMINDER: "Check-in reminder",
   CHECKOUT_REMINDER: "Check-out reminder",
   SERVICE_REQUEST_UPDATE: "Service request update",
