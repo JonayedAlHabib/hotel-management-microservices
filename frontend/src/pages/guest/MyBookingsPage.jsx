@@ -331,7 +331,10 @@ function BookingCard({ r, photoUrl, canCancel, canPay, cancelling, onCancel, onP
                 {bucketLabel}
               </span>
             </div>
-            <p className="text-xs text-forest-900/50 mt-1">{r.reference}</p>
+            <p className="text-xs text-forest-900/50 mt-1">
+              {r.reference}
+              {r.room?.roomNumber && ` · Room ${r.room.roomNumber}`}
+            </p>
             <div className="flex items-center gap-3 text-xs text-forest-900/50 mt-1.5 flex-wrap">
               <span className="flex items-center gap-1">
                 <CalendarDays size={13} />

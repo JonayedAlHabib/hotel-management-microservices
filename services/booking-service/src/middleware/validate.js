@@ -51,6 +51,7 @@ const dateOnly = z
 const reservationSchema = z
   .object({
     roomTypeId: z.string().uuid("roomTypeId must be a valid room type id"),
+    roomId: z.string().uuid("roomId must be a valid room id").optional(),
     checkIn: dateOnly,
     checkOut: dateOnly,
     guestCount: z.number().int().min(1, "guestCount must be at least 1"),
@@ -108,6 +109,27 @@ const confirmReservationSchema = z.object({
   note: z.string().trim().max(500).optional(),
 });
 
+// UC-A29: content fields only — taxRateBp/amenities are a pricing-policy
+// change, deliberately excluded here (see hotelConfig.controller.js).
+const hotelConfigUpdateSchema = z
+  .object({
+    name: z.string().trim().min(1, "name cannot be empty").optional(),
+    description: z.string().trim().max(2000).optional(),
+    address: z.string().trim().max(500).optional(),
+    phone: z.string().trim().max(50).optional(),
+    email: z.string().trim().email("must be a valid email").optional(),
+    checkInTime: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "must be HH:mm (24-hour)")
+      .optional(),
+    checkOutTime: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "must be HH:mm (24-hour)")
+      .optional(),
+    cancellationPolicy: z.string().trim().max(2000).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, { message: "At least one field must be provided to update" });
+
 const validateRoomType = runSchema(roomTypeSchema);
 const validateRoom = runSchema(roomSchema);
 const validateRoomStatus = runSchema(roomStatusSchema);
@@ -116,6 +138,7 @@ const validateCancelReservation = runSchema(cancelReservationSchema);
 const validateModifyReservation = runSchema(modifyReservationSchema);
 const validateAssignRoom = runSchema(assignRoomSchema);
 const validateConfirmReservation = runSchema(confirmReservationSchema);
+const validateHotelConfig = runSchema(hotelConfigUpdateSchema);
 
 export {
   validateRoomType,
@@ -126,4 +149,5 @@ export {
   validateModifyReservation,
   validateAssignRoom,
   validateConfirmReservation,
+  validateHotelConfig,
 };

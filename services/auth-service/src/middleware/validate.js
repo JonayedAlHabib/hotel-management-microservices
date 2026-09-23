@@ -3,6 +3,10 @@ import { ApiError } from "../utils/apiError.js";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/; // 8+ chars, at least one letter and one number
 
+const ID_TYPES = ["NID", "PASSPORT"];
+const NID_RE = /^(\d{10}|\d{13}|\d{17})$/; // Bangladeshi NID: 10, 13, or 17 digits, nothing else
+const PASSPORT_RE = /^[A-Z]{1,2}\d{6,7}$/; // e.g. Bangladeshi passport "BN0123456": 1-2 letters + 6-7 digits
+
 function validateRegister(req, res, next) {
   const { name, email, password } = req.body;
   const errors = [];
@@ -30,4 +34,4 @@ function validateLogin(req, res, next) {
   next();
 }
 
-export { validateRegister, validateLogin, PASSWORD_RE };
+export { validateRegister, validateLogin, PASSWORD_RE, ID_TYPES, NID_RE, PASSPORT_RE };

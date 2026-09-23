@@ -14,6 +14,7 @@ import {
   NO_SHOW_CUTOFF_HOUR,
   FREE_CANCELLATION_HOURS_BEFORE_CHECKIN,
   CANCELLATION_FEE_NIGHTS,
+  ROOM_STATUSES_EXCLUDED_FROM_AVAILABILITY,
 } from "../config/constants.js";
 
 const MAX_RETRIES = 3;
@@ -74,6 +75,7 @@ async function createReservation(input) {
   const {
     idempotencyKey,
     roomTypeId,
+    roomId,
     checkIn,
     checkOut,
     guestCount,
@@ -116,6 +118,36 @@ async function createReservation(input) {
             throw new ApiError(409, "Room type is sold out for these dates");
           }
 
+          // Guest picked a specific physical room — a stricter, separate
+          // guarantee from the pooled type-level check above: re-validated
+          // here (not trusted from an earlier read-only /available-rooms
+          // call) and re-checked for conflicts inside this same SERIALIZABLE
+          // transaction, so two guests racing for the same room number can't
+          // both win it, the same protection BR-02 gives at the type level.
+          let assignedRoomId = null;
+          if (roomId) {
+            const room = await tx.room.findUnique({ where: { id: roomId } });
+            if (!room || !room.isActive || room.roomTypeId !== roomTypeId) {
+              throw new ApiError(404, "Selected room not found for this room type");
+            }
+            if (ROOM_STATUSES_EXCLUDED_FROM_AVAILABILITY.includes(room.status)) {
+              throw new ApiError(409, "Selected room is not available right now");
+            }
+            const now = new Date();
+            const roomConflict = await tx.reservation.findFirst({
+              where: {
+                roomId,
+                checkIn: { lt: checkOut },
+                checkOut: { gt: checkIn },
+                OR: [{ status: "CONFIRMED" }, { status: "PENDING", holdExpiresAt: { gt: now } }],
+              },
+            });
+            if (roomConflict) {
+              throw new ApiError(409, "Selected room was just booked by someone else for these dates — please pick another room");
+            }
+            assignedRoomId = roomId;
+          }
+
           const guest = await findOrCreateGuest(tx, { userId: createdBy, guestName, guestPhone, guestEmail });
 
           // US-G09.2 AC5: checked by the GUEST's identity, not who's creating the
@@ -153,6 +185,7 @@ async function createReservation(input) {
               reference,
               guestId: guest.id,
               roomTypeId,
+              roomId: assignedRoomId,
               checkIn,
               checkOut,
               guestCount,

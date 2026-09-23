@@ -1,7 +1,7 @@
 import { prisma } from "../db/prisma.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
-import { checkAvailability } from "../services/availability.service.js";
+import { checkAvailability, listAvailableRooms } from "../services/availability.service.js";
 import { MAX_STAY_NIGHTS, MIN_STAY_NIGHTS } from "../config/constants.js";
 import { todayInHotelTimezone, parseDateParam } from "../utils/date.js";
 
@@ -89,4 +89,21 @@ async function getAvailability(req, res) {
   res.json(new ApiResponse(200, { results: results.filter((r) => r.available) }, "Fetched availability"));
 }
 
-export { getAvailability };
+// GET /room-types/:id/available-rooms?checkIn=&checkOut= — the specific
+// physical rooms (roomNumber/floor) of this type still free for these dates,
+// so a guest can pick an actual room instead of just booking the type blind.
+async function getAvailableRooms(req, res) {
+  const { id } = req.params;
+  const checkIn = parseDateParam(req.query.checkIn, "checkIn");
+  const checkOut = parseDateParam(req.query.checkOut, "checkOut");
+  if (checkIn < todayInHotelTimezone()) throw new ApiError(400, "checkIn cannot be in the past");
+  if (checkOut <= checkIn) throw new ApiError(400, "checkOut must be after checkIn");
+
+  const roomType = await prisma.roomType.findFirst({ where: { id, isActive: true } });
+  if (!roomType) throw new ApiError(404, "Room type not found");
+
+  const rooms = await listAvailableRooms(prisma, { roomTypeId: id, checkIn, checkOut });
+  res.json(new ApiResponse(200, { rooms }, "Fetched available rooms"));
+}
+
+export { getAvailability, getAvailableRooms };

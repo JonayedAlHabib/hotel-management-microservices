@@ -1,7 +1,7 @@
 // One-off/idempotent data load for The Royal Snooze's real room inventory —
 // run with `node scripts/seedHotelData.js` from services/booking-service.
 // Safe to re-run: upserts by RoomType.name and Room.roomNumber (both unique).
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/generated/prisma/index.js";
 
 const prisma = new PrismaClient();
 

@@ -21,7 +21,17 @@ function readFiltersFromParams(searchParams) {
     bedType: searchParams.get("bedType") || "",
     amenity: searchParams.get("amenity") || "",
     sortDir: searchParams.get("sortDir") || "",
+    q: searchParams.get("q") || "",
   };
+}
+
+function matchesQuery(roomType, q) {
+  if (!q) return true;
+  const term = q.trim().toLowerCase();
+  return (
+    roomType.name?.toLowerCase().includes(term) ||
+    roomType.description?.toLowerCase().includes(term)
+  );
 }
 
 export default function RoomsPage() {
@@ -104,9 +114,11 @@ export default function RoomsPage() {
 
   // Browse mode still supports the older single ?amenity= client-side filter
   // over /room-types (no dates -> no server-side amenity filtering happens).
-  const visibleRoomTypes = filters.amenity
-    ? roomTypes?.filter((r) => r.amenities?.[filters.amenity])
-    : roomTypes;
+  const visibleRoomTypes = roomTypes
+    ?.filter((r) => (filters.amenity ? r.amenities?.[filters.amenity] : true))
+    .filter((r) => matchesQuery(r, filters.q));
+
+  const visibleResults = results ? results.filter((r) => matchesQuery(r.roomType, filters.q)) : results;
 
   const filtersActive =
     filters.guestCount || filters.minPrice || filters.maxPrice || filters.bedType || filters.amenity || filters.sortDir;
@@ -146,12 +158,21 @@ export default function RoomsPage() {
             </div>
           )}
 
+          {filters.q && (
+            <div className="flex items-center gap-2 text-sm text-forest-900/70 bg-forest-50 border border-forest-900/10 rounded-lg px-3 py-2 w-fit">
+              Showing results for <span className="font-medium text-forest-900">&ldquo;{filters.q}&rdquo;</span>
+              <button type="button" onClick={() => setFilters({ q: "" })} className="text-forest-900 font-medium hover:underline">
+                Clear
+              </button>
+            </div>
+          )}
+
           {error && (
             <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
           )}
 
           {hasDates ? (
-            <SearchResultsGrid results={results} />
+            <SearchResultsGrid results={visibleResults} />
           ) : (
             <BrowseGrid roomTypes={visibleRoomTypes} loading={roomTypes === null && !error} />
           )}

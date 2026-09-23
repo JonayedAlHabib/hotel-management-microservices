@@ -72,7 +72,7 @@ export default function PaymentPage() {
     );
   }
 
-  const { checkIn, checkOut, guestCount, form, idempotencyKey, roomType, nights, estimatedSubtotal } = state;
+  const { checkIn, checkOut, guestCount, form, idempotencyKey, roomType, nights, estimatedSubtotal, roomId, roomNumber } = state;
 
   async function handleConfirm(e) {
     e.preventDefault();
@@ -84,7 +84,7 @@ export default function PaymentPage() {
       setStep("booking");
       const bookingRes = await bookingApi.post(
         "/bookings",
-        { roomTypeId, checkIn, checkOut, guestCount, ...form },
+        { roomTypeId, roomId, checkIn, checkOut, guestCount, ...form },
         { headers: { "Idempotency-Key": idempotencyKey } }
       );
       const reservation = bookingRes.data.data.reservation;
@@ -212,7 +212,10 @@ export default function PaymentPage() {
             <div className="text-sm text-forest-900/70 space-y-2">
               <div className="flex justify-between">
                 <span>Room</span>
-                <span className="font-medium text-forest-900 text-right">{roomType.name}</span>
+                <span className="font-medium text-forest-900 text-right">
+                  {roomType.name}
+                  {roomNumber && ` · Room ${roomNumber}`}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Dates</span>

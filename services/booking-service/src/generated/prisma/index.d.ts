@@ -58,6 +58,11 @@ export type RoomStatusHistory = $Result.DefaultSelection<Prisma.$RoomStatusHisto
  * 
  */
 export type HotelConfig = $Result.DefaultSelection<Prisma.$HotelConfigPayload>
+/**
+ * Model HotelConfigChangeLog
+ * 
+ */
+export type HotelConfigChangeLog = $Result.DefaultSelection<Prisma.$HotelConfigChangeLogPayload>
 
 /**
  * Enums
@@ -321,6 +326,16 @@ export class PrismaClient<
     * ```
     */
   get hotelConfig(): Prisma.HotelConfigDelegate<ExtArgs>;
+
+  /**
+   * `prisma.hotelConfigChangeLog`: Exposes CRUD operations for the **HotelConfigChangeLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more HotelConfigChangeLogs
+    * const hotelConfigChangeLogs = await prisma.hotelConfigChangeLog.findMany()
+    * ```
+    */
+  get hotelConfigChangeLog(): Prisma.HotelConfigChangeLogDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -770,7 +785,8 @@ export namespace Prisma {
     ReservationStatusHistory: 'ReservationStatusHistory',
     ReservationChangeLog: 'ReservationChangeLog',
     RoomStatusHistory: 'RoomStatusHistory',
-    HotelConfig: 'HotelConfig'
+    HotelConfig: 'HotelConfig',
+    HotelConfigChangeLog: 'HotelConfigChangeLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -786,7 +802,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "roomType" | "roomTypePhoto" | "room" | "guest" | "reservation" | "reservationStatusHistory" | "reservationChangeLog" | "roomStatusHistory" | "hotelConfig"
+      modelProps: "roomType" | "roomTypePhoto" | "room" | "guest" | "reservation" | "reservationStatusHistory" | "reservationChangeLog" | "roomStatusHistory" | "hotelConfig" | "hotelConfigChangeLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1420,6 +1436,76 @@ export namespace Prisma {
           }
         }
       }
+      HotelConfigChangeLog: {
+        payload: Prisma.$HotelConfigChangeLogPayload<ExtArgs>
+        fields: Prisma.HotelConfigChangeLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.HotelConfigChangeLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.HotelConfigChangeLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>
+          }
+          findFirst: {
+            args: Prisma.HotelConfigChangeLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.HotelConfigChangeLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>
+          }
+          findMany: {
+            args: Prisma.HotelConfigChangeLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>[]
+          }
+          create: {
+            args: Prisma.HotelConfigChangeLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>
+          }
+          createMany: {
+            args: Prisma.HotelConfigChangeLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.HotelConfigChangeLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>[]
+          }
+          delete: {
+            args: Prisma.HotelConfigChangeLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>
+          }
+          update: {
+            args: Prisma.HotelConfigChangeLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.HotelConfigChangeLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.HotelConfigChangeLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.HotelConfigChangeLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HotelConfigChangeLogPayload>
+          }
+          aggregate: {
+            args: Prisma.HotelConfigChangeLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateHotelConfigChangeLog>
+          }
+          groupBy: {
+            args: Prisma.HotelConfigChangeLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<HotelConfigChangeLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.HotelConfigChangeLogCountArgs<ExtArgs>
+            result: $Utils.Optional<HotelConfigChangeLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1733,6 +1819,37 @@ export namespace Prisma {
    */
   export type ReservationCountOutputTypeCountChangeLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ReservationChangeLogWhereInput
+  }
+
+
+  /**
+   * Count Type HotelConfigCountOutputType
+   */
+
+  export type HotelConfigCountOutputType = {
+    changeLogs: number
+  }
+
+  export type HotelConfigCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    changeLogs?: boolean | HotelConfigCountOutputTypeCountChangeLogsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * HotelConfigCountOutputType without action
+   */
+  export type HotelConfigCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigCountOutputType
+     */
+    select?: HotelConfigCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * HotelConfigCountOutputType without action
+   */
+  export type HotelConfigCountOutputTypeCountChangeLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: HotelConfigChangeLogWhereInput
   }
 
 
@@ -10065,6 +10182,8 @@ export namespace Prisma {
     taxRateBp?: boolean
     amenities?: boolean
     updatedAt?: boolean
+    changeLogs?: boolean | HotelConfig$changeLogsArgs<ExtArgs>
+    _count?: boolean | HotelConfigCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["hotelConfig"]>
 
   export type HotelConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10097,10 +10216,17 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type HotelConfigInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    changeLogs?: boolean | HotelConfig$changeLogsArgs<ExtArgs>
+    _count?: boolean | HotelConfigCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type HotelConfigIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $HotelConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "HotelConfig"
-    objects: {}
+    objects: {
+      changeLogs: Prisma.$HotelConfigChangeLogPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
@@ -10478,6 +10604,7 @@ export namespace Prisma {
    */
   export interface Prisma__HotelConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    changeLogs<T extends HotelConfig$changeLogsArgs<ExtArgs> = {}>(args?: Subset<T, HotelConfig$changeLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10532,6 +10659,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * Filter, which HotelConfig to fetch.
      */
     where: HotelConfigWhereUniqueInput
@@ -10546,6 +10677,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * Filter, which HotelConfig to fetch.
      */
     where: HotelConfigWhereUniqueInput
@@ -10559,6 +10694,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the HotelConfig
      */
     select?: HotelConfigSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
     /**
      * Filter, which HotelConfig to fetch.
      */
@@ -10604,6 +10743,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * Filter, which HotelConfig to fetch.
      */
     where?: HotelConfigWhereInput
@@ -10648,6 +10791,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * Filter, which HotelConfigs to fetch.
      */
     where?: HotelConfigWhereInput
@@ -10686,6 +10833,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the HotelConfig
      */
     select?: HotelConfigSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
     /**
      * The data needed to create a HotelConfig.
      */
@@ -10727,6 +10878,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * The data needed to update a HotelConfig.
      */
     data: XOR<HotelConfigUpdateInput, HotelConfigUncheckedUpdateInput>
@@ -10759,6 +10914,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * The filter to search for the HotelConfig to update in case it exists.
      */
     where: HotelConfigWhereUniqueInput
@@ -10781,6 +10940,10 @@ export namespace Prisma {
      */
     select?: HotelConfigSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+    /**
      * Filter which HotelConfig to delete.
      */
     where: HotelConfigWhereUniqueInput
@@ -10797,6 +10960,26 @@ export namespace Prisma {
   }
 
   /**
+   * HotelConfig.changeLogs
+   */
+  export type HotelConfig$changeLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    where?: HotelConfigChangeLogWhereInput
+    orderBy?: HotelConfigChangeLogOrderByWithRelationInput | HotelConfigChangeLogOrderByWithRelationInput[]
+    cursor?: HotelConfigChangeLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: HotelConfigChangeLogScalarFieldEnum | HotelConfigChangeLogScalarFieldEnum[]
+  }
+
+  /**
    * HotelConfig without action
    */
   export type HotelConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10804,6 +10987,967 @@ export namespace Prisma {
      * Select specific fields to fetch from the HotelConfig
      */
     select?: HotelConfigSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model HotelConfigChangeLog
+   */
+
+  export type AggregateHotelConfigChangeLog = {
+    _count: HotelConfigChangeLogCountAggregateOutputType | null
+    _min: HotelConfigChangeLogMinAggregateOutputType | null
+    _max: HotelConfigChangeLogMaxAggregateOutputType | null
+  }
+
+  export type HotelConfigChangeLogMinAggregateOutputType = {
+    id: string | null
+    hotelConfigId: string | null
+    field: string | null
+    oldValue: string | null
+    newValue: string | null
+    changedBy: string | null
+    changedAt: Date | null
+  }
+
+  export type HotelConfigChangeLogMaxAggregateOutputType = {
+    id: string | null
+    hotelConfigId: string | null
+    field: string | null
+    oldValue: string | null
+    newValue: string | null
+    changedBy: string | null
+    changedAt: Date | null
+  }
+
+  export type HotelConfigChangeLogCountAggregateOutputType = {
+    id: number
+    hotelConfigId: number
+    field: number
+    oldValue: number
+    newValue: number
+    changedBy: number
+    changedAt: number
+    _all: number
+  }
+
+
+  export type HotelConfigChangeLogMinAggregateInputType = {
+    id?: true
+    hotelConfigId?: true
+    field?: true
+    oldValue?: true
+    newValue?: true
+    changedBy?: true
+    changedAt?: true
+  }
+
+  export type HotelConfigChangeLogMaxAggregateInputType = {
+    id?: true
+    hotelConfigId?: true
+    field?: true
+    oldValue?: true
+    newValue?: true
+    changedBy?: true
+    changedAt?: true
+  }
+
+  export type HotelConfigChangeLogCountAggregateInputType = {
+    id?: true
+    hotelConfigId?: true
+    field?: true
+    oldValue?: true
+    newValue?: true
+    changedBy?: true
+    changedAt?: true
+    _all?: true
+  }
+
+  export type HotelConfigChangeLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which HotelConfigChangeLog to aggregate.
+     */
+    where?: HotelConfigChangeLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of HotelConfigChangeLogs to fetch.
+     */
+    orderBy?: HotelConfigChangeLogOrderByWithRelationInput | HotelConfigChangeLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: HotelConfigChangeLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` HotelConfigChangeLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` HotelConfigChangeLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned HotelConfigChangeLogs
+    **/
+    _count?: true | HotelConfigChangeLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: HotelConfigChangeLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: HotelConfigChangeLogMaxAggregateInputType
+  }
+
+  export type GetHotelConfigChangeLogAggregateType<T extends HotelConfigChangeLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateHotelConfigChangeLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateHotelConfigChangeLog[P]>
+      : GetScalarType<T[P], AggregateHotelConfigChangeLog[P]>
+  }
+
+
+
+
+  export type HotelConfigChangeLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: HotelConfigChangeLogWhereInput
+    orderBy?: HotelConfigChangeLogOrderByWithAggregationInput | HotelConfigChangeLogOrderByWithAggregationInput[]
+    by: HotelConfigChangeLogScalarFieldEnum[] | HotelConfigChangeLogScalarFieldEnum
+    having?: HotelConfigChangeLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: HotelConfigChangeLogCountAggregateInputType | true
+    _min?: HotelConfigChangeLogMinAggregateInputType
+    _max?: HotelConfigChangeLogMaxAggregateInputType
+  }
+
+  export type HotelConfigChangeLogGroupByOutputType = {
+    id: string
+    hotelConfigId: string
+    field: string
+    oldValue: string | null
+    newValue: string | null
+    changedBy: string
+    changedAt: Date
+    _count: HotelConfigChangeLogCountAggregateOutputType | null
+    _min: HotelConfigChangeLogMinAggregateOutputType | null
+    _max: HotelConfigChangeLogMaxAggregateOutputType | null
+  }
+
+  type GetHotelConfigChangeLogGroupByPayload<T extends HotelConfigChangeLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<HotelConfigChangeLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof HotelConfigChangeLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], HotelConfigChangeLogGroupByOutputType[P]>
+            : GetScalarType<T[P], HotelConfigChangeLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type HotelConfigChangeLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    hotelConfigId?: boolean
+    field?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    changedBy?: boolean
+    changedAt?: boolean
+    hotelConfig?: boolean | HotelConfigDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["hotelConfigChangeLog"]>
+
+  export type HotelConfigChangeLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    hotelConfigId?: boolean
+    field?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    changedBy?: boolean
+    changedAt?: boolean
+    hotelConfig?: boolean | HotelConfigDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["hotelConfigChangeLog"]>
+
+  export type HotelConfigChangeLogSelectScalar = {
+    id?: boolean
+    hotelConfigId?: boolean
+    field?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    changedBy?: boolean
+    changedAt?: boolean
+  }
+
+  export type HotelConfigChangeLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    hotelConfig?: boolean | HotelConfigDefaultArgs<ExtArgs>
+  }
+  export type HotelConfigChangeLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    hotelConfig?: boolean | HotelConfigDefaultArgs<ExtArgs>
+  }
+
+  export type $HotelConfigChangeLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "HotelConfigChangeLog"
+    objects: {
+      hotelConfig: Prisma.$HotelConfigPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      hotelConfigId: string
+      field: string
+      oldValue: string | null
+      newValue: string | null
+      changedBy: string
+      changedAt: Date
+    }, ExtArgs["result"]["hotelConfigChangeLog"]>
+    composites: {}
+  }
+
+  type HotelConfigChangeLogGetPayload<S extends boolean | null | undefined | HotelConfigChangeLogDefaultArgs> = $Result.GetResult<Prisma.$HotelConfigChangeLogPayload, S>
+
+  type HotelConfigChangeLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<HotelConfigChangeLogFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: HotelConfigChangeLogCountAggregateInputType | true
+    }
+
+  export interface HotelConfigChangeLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['HotelConfigChangeLog'], meta: { name: 'HotelConfigChangeLog' } }
+    /**
+     * Find zero or one HotelConfigChangeLog that matches the filter.
+     * @param {HotelConfigChangeLogFindUniqueArgs} args - Arguments to find a HotelConfigChangeLog
+     * @example
+     * // Get one HotelConfigChangeLog
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends HotelConfigChangeLogFindUniqueArgs>(args: SelectSubset<T, HotelConfigChangeLogFindUniqueArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one HotelConfigChangeLog that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {HotelConfigChangeLogFindUniqueOrThrowArgs} args - Arguments to find a HotelConfigChangeLog
+     * @example
+     * // Get one HotelConfigChangeLog
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends HotelConfigChangeLogFindUniqueOrThrowArgs>(args: SelectSubset<T, HotelConfigChangeLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first HotelConfigChangeLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogFindFirstArgs} args - Arguments to find a HotelConfigChangeLog
+     * @example
+     * // Get one HotelConfigChangeLog
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends HotelConfigChangeLogFindFirstArgs>(args?: SelectSubset<T, HotelConfigChangeLogFindFirstArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first HotelConfigChangeLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogFindFirstOrThrowArgs} args - Arguments to find a HotelConfigChangeLog
+     * @example
+     * // Get one HotelConfigChangeLog
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends HotelConfigChangeLogFindFirstOrThrowArgs>(args?: SelectSubset<T, HotelConfigChangeLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more HotelConfigChangeLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all HotelConfigChangeLogs
+     * const hotelConfigChangeLogs = await prisma.hotelConfigChangeLog.findMany()
+     * 
+     * // Get first 10 HotelConfigChangeLogs
+     * const hotelConfigChangeLogs = await prisma.hotelConfigChangeLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const hotelConfigChangeLogWithIdOnly = await prisma.hotelConfigChangeLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends HotelConfigChangeLogFindManyArgs>(args?: SelectSubset<T, HotelConfigChangeLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a HotelConfigChangeLog.
+     * @param {HotelConfigChangeLogCreateArgs} args - Arguments to create a HotelConfigChangeLog.
+     * @example
+     * // Create one HotelConfigChangeLog
+     * const HotelConfigChangeLog = await prisma.hotelConfigChangeLog.create({
+     *   data: {
+     *     // ... data to create a HotelConfigChangeLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends HotelConfigChangeLogCreateArgs>(args: SelectSubset<T, HotelConfigChangeLogCreateArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many HotelConfigChangeLogs.
+     * @param {HotelConfigChangeLogCreateManyArgs} args - Arguments to create many HotelConfigChangeLogs.
+     * @example
+     * // Create many HotelConfigChangeLogs
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends HotelConfigChangeLogCreateManyArgs>(args?: SelectSubset<T, HotelConfigChangeLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many HotelConfigChangeLogs and returns the data saved in the database.
+     * @param {HotelConfigChangeLogCreateManyAndReturnArgs} args - Arguments to create many HotelConfigChangeLogs.
+     * @example
+     * // Create many HotelConfigChangeLogs
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many HotelConfigChangeLogs and only return the `id`
+     * const hotelConfigChangeLogWithIdOnly = await prisma.hotelConfigChangeLog.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends HotelConfigChangeLogCreateManyAndReturnArgs>(args?: SelectSubset<T, HotelConfigChangeLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a HotelConfigChangeLog.
+     * @param {HotelConfigChangeLogDeleteArgs} args - Arguments to delete one HotelConfigChangeLog.
+     * @example
+     * // Delete one HotelConfigChangeLog
+     * const HotelConfigChangeLog = await prisma.hotelConfigChangeLog.delete({
+     *   where: {
+     *     // ... filter to delete one HotelConfigChangeLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends HotelConfigChangeLogDeleteArgs>(args: SelectSubset<T, HotelConfigChangeLogDeleteArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one HotelConfigChangeLog.
+     * @param {HotelConfigChangeLogUpdateArgs} args - Arguments to update one HotelConfigChangeLog.
+     * @example
+     * // Update one HotelConfigChangeLog
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends HotelConfigChangeLogUpdateArgs>(args: SelectSubset<T, HotelConfigChangeLogUpdateArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more HotelConfigChangeLogs.
+     * @param {HotelConfigChangeLogDeleteManyArgs} args - Arguments to filter HotelConfigChangeLogs to delete.
+     * @example
+     * // Delete a few HotelConfigChangeLogs
+     * const { count } = await prisma.hotelConfigChangeLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends HotelConfigChangeLogDeleteManyArgs>(args?: SelectSubset<T, HotelConfigChangeLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more HotelConfigChangeLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many HotelConfigChangeLogs
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends HotelConfigChangeLogUpdateManyArgs>(args: SelectSubset<T, HotelConfigChangeLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one HotelConfigChangeLog.
+     * @param {HotelConfigChangeLogUpsertArgs} args - Arguments to update or create a HotelConfigChangeLog.
+     * @example
+     * // Update or create a HotelConfigChangeLog
+     * const hotelConfigChangeLog = await prisma.hotelConfigChangeLog.upsert({
+     *   create: {
+     *     // ... data to create a HotelConfigChangeLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the HotelConfigChangeLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends HotelConfigChangeLogUpsertArgs>(args: SelectSubset<T, HotelConfigChangeLogUpsertArgs<ExtArgs>>): Prisma__HotelConfigChangeLogClient<$Result.GetResult<Prisma.$HotelConfigChangeLogPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of HotelConfigChangeLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogCountArgs} args - Arguments to filter HotelConfigChangeLogs to count.
+     * @example
+     * // Count the number of HotelConfigChangeLogs
+     * const count = await prisma.hotelConfigChangeLog.count({
+     *   where: {
+     *     // ... the filter for the HotelConfigChangeLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends HotelConfigChangeLogCountArgs>(
+      args?: Subset<T, HotelConfigChangeLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], HotelConfigChangeLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a HotelConfigChangeLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends HotelConfigChangeLogAggregateArgs>(args: Subset<T, HotelConfigChangeLogAggregateArgs>): Prisma.PrismaPromise<GetHotelConfigChangeLogAggregateType<T>>
+
+    /**
+     * Group by HotelConfigChangeLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HotelConfigChangeLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends HotelConfigChangeLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: HotelConfigChangeLogGroupByArgs['orderBy'] }
+        : { orderBy?: HotelConfigChangeLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, HotelConfigChangeLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetHotelConfigChangeLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the HotelConfigChangeLog model
+   */
+  readonly fields: HotelConfigChangeLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for HotelConfigChangeLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__HotelConfigChangeLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    hotelConfig<T extends HotelConfigDefaultArgs<ExtArgs> = {}>(args?: Subset<T, HotelConfigDefaultArgs<ExtArgs>>): Prisma__HotelConfigClient<$Result.GetResult<Prisma.$HotelConfigPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the HotelConfigChangeLog model
+   */ 
+  interface HotelConfigChangeLogFieldRefs {
+    readonly id: FieldRef<"HotelConfigChangeLog", 'String'>
+    readonly hotelConfigId: FieldRef<"HotelConfigChangeLog", 'String'>
+    readonly field: FieldRef<"HotelConfigChangeLog", 'String'>
+    readonly oldValue: FieldRef<"HotelConfigChangeLog", 'String'>
+    readonly newValue: FieldRef<"HotelConfigChangeLog", 'String'>
+    readonly changedBy: FieldRef<"HotelConfigChangeLog", 'String'>
+    readonly changedAt: FieldRef<"HotelConfigChangeLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * HotelConfigChangeLog findUnique
+   */
+  export type HotelConfigChangeLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * Filter, which HotelConfigChangeLog to fetch.
+     */
+    where: HotelConfigChangeLogWhereUniqueInput
+  }
+
+  /**
+   * HotelConfigChangeLog findUniqueOrThrow
+   */
+  export type HotelConfigChangeLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * Filter, which HotelConfigChangeLog to fetch.
+     */
+    where: HotelConfigChangeLogWhereUniqueInput
+  }
+
+  /**
+   * HotelConfigChangeLog findFirst
+   */
+  export type HotelConfigChangeLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * Filter, which HotelConfigChangeLog to fetch.
+     */
+    where?: HotelConfigChangeLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of HotelConfigChangeLogs to fetch.
+     */
+    orderBy?: HotelConfigChangeLogOrderByWithRelationInput | HotelConfigChangeLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for HotelConfigChangeLogs.
+     */
+    cursor?: HotelConfigChangeLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` HotelConfigChangeLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` HotelConfigChangeLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of HotelConfigChangeLogs.
+     */
+    distinct?: HotelConfigChangeLogScalarFieldEnum | HotelConfigChangeLogScalarFieldEnum[]
+  }
+
+  /**
+   * HotelConfigChangeLog findFirstOrThrow
+   */
+  export type HotelConfigChangeLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * Filter, which HotelConfigChangeLog to fetch.
+     */
+    where?: HotelConfigChangeLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of HotelConfigChangeLogs to fetch.
+     */
+    orderBy?: HotelConfigChangeLogOrderByWithRelationInput | HotelConfigChangeLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for HotelConfigChangeLogs.
+     */
+    cursor?: HotelConfigChangeLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` HotelConfigChangeLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` HotelConfigChangeLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of HotelConfigChangeLogs.
+     */
+    distinct?: HotelConfigChangeLogScalarFieldEnum | HotelConfigChangeLogScalarFieldEnum[]
+  }
+
+  /**
+   * HotelConfigChangeLog findMany
+   */
+  export type HotelConfigChangeLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * Filter, which HotelConfigChangeLogs to fetch.
+     */
+    where?: HotelConfigChangeLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of HotelConfigChangeLogs to fetch.
+     */
+    orderBy?: HotelConfigChangeLogOrderByWithRelationInput | HotelConfigChangeLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing HotelConfigChangeLogs.
+     */
+    cursor?: HotelConfigChangeLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` HotelConfigChangeLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` HotelConfigChangeLogs.
+     */
+    skip?: number
+    distinct?: HotelConfigChangeLogScalarFieldEnum | HotelConfigChangeLogScalarFieldEnum[]
+  }
+
+  /**
+   * HotelConfigChangeLog create
+   */
+  export type HotelConfigChangeLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a HotelConfigChangeLog.
+     */
+    data: XOR<HotelConfigChangeLogCreateInput, HotelConfigChangeLogUncheckedCreateInput>
+  }
+
+  /**
+   * HotelConfigChangeLog createMany
+   */
+  export type HotelConfigChangeLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many HotelConfigChangeLogs.
+     */
+    data: HotelConfigChangeLogCreateManyInput | HotelConfigChangeLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * HotelConfigChangeLog createManyAndReturn
+   */
+  export type HotelConfigChangeLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many HotelConfigChangeLogs.
+     */
+    data: HotelConfigChangeLogCreateManyInput | HotelConfigChangeLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * HotelConfigChangeLog update
+   */
+  export type HotelConfigChangeLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a HotelConfigChangeLog.
+     */
+    data: XOR<HotelConfigChangeLogUpdateInput, HotelConfigChangeLogUncheckedUpdateInput>
+    /**
+     * Choose, which HotelConfigChangeLog to update.
+     */
+    where: HotelConfigChangeLogWhereUniqueInput
+  }
+
+  /**
+   * HotelConfigChangeLog updateMany
+   */
+  export type HotelConfigChangeLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update HotelConfigChangeLogs.
+     */
+    data: XOR<HotelConfigChangeLogUpdateManyMutationInput, HotelConfigChangeLogUncheckedUpdateManyInput>
+    /**
+     * Filter which HotelConfigChangeLogs to update
+     */
+    where?: HotelConfigChangeLogWhereInput
+  }
+
+  /**
+   * HotelConfigChangeLog upsert
+   */
+  export type HotelConfigChangeLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the HotelConfigChangeLog to update in case it exists.
+     */
+    where: HotelConfigChangeLogWhereUniqueInput
+    /**
+     * In case the HotelConfigChangeLog found by the `where` argument doesn't exist, create a new HotelConfigChangeLog with this data.
+     */
+    create: XOR<HotelConfigChangeLogCreateInput, HotelConfigChangeLogUncheckedCreateInput>
+    /**
+     * In case the HotelConfigChangeLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<HotelConfigChangeLogUpdateInput, HotelConfigChangeLogUncheckedUpdateInput>
+  }
+
+  /**
+   * HotelConfigChangeLog delete
+   */
+  export type HotelConfigChangeLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
+    /**
+     * Filter which HotelConfigChangeLog to delete.
+     */
+    where: HotelConfigChangeLogWhereUniqueInput
+  }
+
+  /**
+   * HotelConfigChangeLog deleteMany
+   */
+  export type HotelConfigChangeLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which HotelConfigChangeLogs to delete
+     */
+    where?: HotelConfigChangeLogWhereInput
+  }
+
+  /**
+   * HotelConfigChangeLog without action
+   */
+  export type HotelConfigChangeLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HotelConfigChangeLog
+     */
+    select?: HotelConfigChangeLogSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HotelConfigChangeLogInclude<ExtArgs> | null
   }
 
 
@@ -10949,6 +12093,19 @@ export namespace Prisma {
   };
 
   export type HotelConfigScalarFieldEnum = (typeof HotelConfigScalarFieldEnum)[keyof typeof HotelConfigScalarFieldEnum]
+
+
+  export const HotelConfigChangeLogScalarFieldEnum: {
+    id: 'id',
+    hotelConfigId: 'hotelConfigId',
+    field: 'field',
+    oldValue: 'oldValue',
+    newValue: 'newValue',
+    changedBy: 'changedBy',
+    changedAt: 'changedAt'
+  };
+
+  export type HotelConfigChangeLogScalarFieldEnum = (typeof HotelConfigChangeLogScalarFieldEnum)[keyof typeof HotelConfigChangeLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -11718,6 +12875,7 @@ export namespace Prisma {
     taxRateBp?: IntFilter<"HotelConfig"> | number
     amenities?: JsonNullableFilter<"HotelConfig">
     updatedAt?: DateTimeFilter<"HotelConfig"> | Date | string
+    changeLogs?: HotelConfigChangeLogListRelationFilter
   }
 
   export type HotelConfigOrderByWithRelationInput = {
@@ -11733,6 +12891,7 @@ export namespace Prisma {
     taxRateBp?: SortOrder
     amenities?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
+    changeLogs?: HotelConfigChangeLogOrderByRelationAggregateInput
   }
 
   export type HotelConfigWhereUniqueInput = Prisma.AtLeast<{
@@ -11751,6 +12910,7 @@ export namespace Prisma {
     taxRateBp?: IntFilter<"HotelConfig"> | number
     amenities?: JsonNullableFilter<"HotelConfig">
     updatedAt?: DateTimeFilter<"HotelConfig"> | Date | string
+    changeLogs?: HotelConfigChangeLogListRelationFilter
   }, "id">
 
   export type HotelConfigOrderByWithAggregationInput = {
@@ -11789,6 +12949,71 @@ export namespace Prisma {
     taxRateBp?: IntWithAggregatesFilter<"HotelConfig"> | number
     amenities?: JsonNullableWithAggregatesFilter<"HotelConfig">
     updatedAt?: DateTimeWithAggregatesFilter<"HotelConfig"> | Date | string
+  }
+
+  export type HotelConfigChangeLogWhereInput = {
+    AND?: HotelConfigChangeLogWhereInput | HotelConfigChangeLogWhereInput[]
+    OR?: HotelConfigChangeLogWhereInput[]
+    NOT?: HotelConfigChangeLogWhereInput | HotelConfigChangeLogWhereInput[]
+    id?: StringFilter<"HotelConfigChangeLog"> | string
+    hotelConfigId?: StringFilter<"HotelConfigChangeLog"> | string
+    field?: StringFilter<"HotelConfigChangeLog"> | string
+    oldValue?: StringNullableFilter<"HotelConfigChangeLog"> | string | null
+    newValue?: StringNullableFilter<"HotelConfigChangeLog"> | string | null
+    changedBy?: StringFilter<"HotelConfigChangeLog"> | string
+    changedAt?: DateTimeFilter<"HotelConfigChangeLog"> | Date | string
+    hotelConfig?: XOR<HotelConfigRelationFilter, HotelConfigWhereInput>
+  }
+
+  export type HotelConfigChangeLogOrderByWithRelationInput = {
+    id?: SortOrder
+    hotelConfigId?: SortOrder
+    field?: SortOrder
+    oldValue?: SortOrderInput | SortOrder
+    newValue?: SortOrderInput | SortOrder
+    changedBy?: SortOrder
+    changedAt?: SortOrder
+    hotelConfig?: HotelConfigOrderByWithRelationInput
+  }
+
+  export type HotelConfigChangeLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: HotelConfigChangeLogWhereInput | HotelConfigChangeLogWhereInput[]
+    OR?: HotelConfigChangeLogWhereInput[]
+    NOT?: HotelConfigChangeLogWhereInput | HotelConfigChangeLogWhereInput[]
+    hotelConfigId?: StringFilter<"HotelConfigChangeLog"> | string
+    field?: StringFilter<"HotelConfigChangeLog"> | string
+    oldValue?: StringNullableFilter<"HotelConfigChangeLog"> | string | null
+    newValue?: StringNullableFilter<"HotelConfigChangeLog"> | string | null
+    changedBy?: StringFilter<"HotelConfigChangeLog"> | string
+    changedAt?: DateTimeFilter<"HotelConfigChangeLog"> | Date | string
+    hotelConfig?: XOR<HotelConfigRelationFilter, HotelConfigWhereInput>
+  }, "id">
+
+  export type HotelConfigChangeLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    hotelConfigId?: SortOrder
+    field?: SortOrder
+    oldValue?: SortOrderInput | SortOrder
+    newValue?: SortOrderInput | SortOrder
+    changedBy?: SortOrder
+    changedAt?: SortOrder
+    _count?: HotelConfigChangeLogCountOrderByAggregateInput
+    _max?: HotelConfigChangeLogMaxOrderByAggregateInput
+    _min?: HotelConfigChangeLogMinOrderByAggregateInput
+  }
+
+  export type HotelConfigChangeLogScalarWhereWithAggregatesInput = {
+    AND?: HotelConfigChangeLogScalarWhereWithAggregatesInput | HotelConfigChangeLogScalarWhereWithAggregatesInput[]
+    OR?: HotelConfigChangeLogScalarWhereWithAggregatesInput[]
+    NOT?: HotelConfigChangeLogScalarWhereWithAggregatesInput | HotelConfigChangeLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"HotelConfigChangeLog"> | string
+    hotelConfigId?: StringWithAggregatesFilter<"HotelConfigChangeLog"> | string
+    field?: StringWithAggregatesFilter<"HotelConfigChangeLog"> | string
+    oldValue?: StringNullableWithAggregatesFilter<"HotelConfigChangeLog"> | string | null
+    newValue?: StringNullableWithAggregatesFilter<"HotelConfigChangeLog"> | string | null
+    changedBy?: StringWithAggregatesFilter<"HotelConfigChangeLog"> | string
+    changedAt?: DateTimeWithAggregatesFilter<"HotelConfigChangeLog"> | Date | string
   }
 
   export type RoomTypeCreateInput = {
@@ -12444,6 +13669,7 @@ export namespace Prisma {
     taxRateBp: number
     amenities?: NullableJsonNullValueInput | InputJsonValue
     updatedAt?: Date | string
+    changeLogs?: HotelConfigChangeLogCreateNestedManyWithoutHotelConfigInput
   }
 
   export type HotelConfigUncheckedCreateInput = {
@@ -12459,6 +13685,7 @@ export namespace Prisma {
     taxRateBp: number
     amenities?: NullableJsonNullValueInput | InputJsonValue
     updatedAt?: Date | string
+    changeLogs?: HotelConfigChangeLogUncheckedCreateNestedManyWithoutHotelConfigInput
   }
 
   export type HotelConfigUpdateInput = {
@@ -12474,6 +13701,7 @@ export namespace Prisma {
     taxRateBp?: IntFieldUpdateOperationsInput | number
     amenities?: NullableJsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    changeLogs?: HotelConfigChangeLogUpdateManyWithoutHotelConfigNestedInput
   }
 
   export type HotelConfigUncheckedUpdateInput = {
@@ -12489,6 +13717,7 @@ export namespace Prisma {
     taxRateBp?: IntFieldUpdateOperationsInput | number
     amenities?: NullableJsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    changeLogs?: HotelConfigChangeLogUncheckedUpdateManyWithoutHotelConfigNestedInput
   }
 
   export type HotelConfigCreateManyInput = {
@@ -12534,6 +13763,75 @@ export namespace Prisma {
     taxRateBp?: IntFieldUpdateOperationsInput | number
     amenities?: NullableJsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HotelConfigChangeLogCreateInput = {
+    id?: string
+    field: string
+    oldValue?: string | null
+    newValue?: string | null
+    changedBy: string
+    changedAt?: Date | string
+    hotelConfig: HotelConfigCreateNestedOneWithoutChangeLogsInput
+  }
+
+  export type HotelConfigChangeLogUncheckedCreateInput = {
+    id?: string
+    hotelConfigId: string
+    field: string
+    oldValue?: string | null
+    newValue?: string | null
+    changedBy: string
+    changedAt?: Date | string
+  }
+
+  export type HotelConfigChangeLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hotelConfig?: HotelConfigUpdateOneRequiredWithoutChangeLogsNestedInput
+  }
+
+  export type HotelConfigChangeLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    hotelConfigId?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HotelConfigChangeLogCreateManyInput = {
+    id?: string
+    hotelConfigId: string
+    field: string
+    oldValue?: string | null
+    newValue?: string | null
+    changedBy: string
+    changedAt?: Date | string
+  }
+
+  export type HotelConfigChangeLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HotelConfigChangeLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    hotelConfigId?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -13203,6 +14501,16 @@ export namespace Prisma {
     changedAt?: SortOrder
   }
 
+  export type HotelConfigChangeLogListRelationFilter = {
+    every?: HotelConfigChangeLogWhereInput
+    some?: HotelConfigChangeLogWhereInput
+    none?: HotelConfigChangeLogWhereInput
+  }
+
+  export type HotelConfigChangeLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type HotelConfigCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -13252,6 +14560,41 @@ export namespace Prisma {
 
   export type HotelConfigSumOrderByAggregateInput = {
     taxRateBp?: SortOrder
+  }
+
+  export type HotelConfigRelationFilter = {
+    is?: HotelConfigWhereInput
+    isNot?: HotelConfigWhereInput
+  }
+
+  export type HotelConfigChangeLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    hotelConfigId?: SortOrder
+    field?: SortOrder
+    oldValue?: SortOrder
+    newValue?: SortOrder
+    changedBy?: SortOrder
+    changedAt?: SortOrder
+  }
+
+  export type HotelConfigChangeLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    hotelConfigId?: SortOrder
+    field?: SortOrder
+    oldValue?: SortOrder
+    newValue?: SortOrder
+    changedBy?: SortOrder
+    changedAt?: SortOrder
+  }
+
+  export type HotelConfigChangeLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    hotelConfigId?: SortOrder
+    field?: SortOrder
+    oldValue?: SortOrder
+    newValue?: SortOrder
+    changedBy?: SortOrder
+    changedAt?: SortOrder
   }
 
   export type RoomCreateNestedManyWithoutRoomTypeInput = {
@@ -13750,6 +15093,62 @@ export namespace Prisma {
     upsert?: RoomUpsertWithoutHistoryInput
     connect?: RoomWhereUniqueInput
     update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutHistoryInput, RoomUpdateWithoutHistoryInput>, RoomUncheckedUpdateWithoutHistoryInput>
+  }
+
+  export type HotelConfigChangeLogCreateNestedManyWithoutHotelConfigInput = {
+    create?: XOR<HotelConfigChangeLogCreateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput> | HotelConfigChangeLogCreateWithoutHotelConfigInput[] | HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput[]
+    connectOrCreate?: HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput | HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput[]
+    createMany?: HotelConfigChangeLogCreateManyHotelConfigInputEnvelope
+    connect?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+  }
+
+  export type HotelConfigChangeLogUncheckedCreateNestedManyWithoutHotelConfigInput = {
+    create?: XOR<HotelConfigChangeLogCreateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput> | HotelConfigChangeLogCreateWithoutHotelConfigInput[] | HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput[]
+    connectOrCreate?: HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput | HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput[]
+    createMany?: HotelConfigChangeLogCreateManyHotelConfigInputEnvelope
+    connect?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+  }
+
+  export type HotelConfigChangeLogUpdateManyWithoutHotelConfigNestedInput = {
+    create?: XOR<HotelConfigChangeLogCreateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput> | HotelConfigChangeLogCreateWithoutHotelConfigInput[] | HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput[]
+    connectOrCreate?: HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput | HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput[]
+    upsert?: HotelConfigChangeLogUpsertWithWhereUniqueWithoutHotelConfigInput | HotelConfigChangeLogUpsertWithWhereUniqueWithoutHotelConfigInput[]
+    createMany?: HotelConfigChangeLogCreateManyHotelConfigInputEnvelope
+    set?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    disconnect?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    delete?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    connect?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    update?: HotelConfigChangeLogUpdateWithWhereUniqueWithoutHotelConfigInput | HotelConfigChangeLogUpdateWithWhereUniqueWithoutHotelConfigInput[]
+    updateMany?: HotelConfigChangeLogUpdateManyWithWhereWithoutHotelConfigInput | HotelConfigChangeLogUpdateManyWithWhereWithoutHotelConfigInput[]
+    deleteMany?: HotelConfigChangeLogScalarWhereInput | HotelConfigChangeLogScalarWhereInput[]
+  }
+
+  export type HotelConfigChangeLogUncheckedUpdateManyWithoutHotelConfigNestedInput = {
+    create?: XOR<HotelConfigChangeLogCreateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput> | HotelConfigChangeLogCreateWithoutHotelConfigInput[] | HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput[]
+    connectOrCreate?: HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput | HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput[]
+    upsert?: HotelConfigChangeLogUpsertWithWhereUniqueWithoutHotelConfigInput | HotelConfigChangeLogUpsertWithWhereUniqueWithoutHotelConfigInput[]
+    createMany?: HotelConfigChangeLogCreateManyHotelConfigInputEnvelope
+    set?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    disconnect?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    delete?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    connect?: HotelConfigChangeLogWhereUniqueInput | HotelConfigChangeLogWhereUniqueInput[]
+    update?: HotelConfigChangeLogUpdateWithWhereUniqueWithoutHotelConfigInput | HotelConfigChangeLogUpdateWithWhereUniqueWithoutHotelConfigInput[]
+    updateMany?: HotelConfigChangeLogUpdateManyWithWhereWithoutHotelConfigInput | HotelConfigChangeLogUpdateManyWithWhereWithoutHotelConfigInput[]
+    deleteMany?: HotelConfigChangeLogScalarWhereInput | HotelConfigChangeLogScalarWhereInput[]
+  }
+
+  export type HotelConfigCreateNestedOneWithoutChangeLogsInput = {
+    create?: XOR<HotelConfigCreateWithoutChangeLogsInput, HotelConfigUncheckedCreateWithoutChangeLogsInput>
+    connectOrCreate?: HotelConfigCreateOrConnectWithoutChangeLogsInput
+    connect?: HotelConfigWhereUniqueInput
+  }
+
+  export type HotelConfigUpdateOneRequiredWithoutChangeLogsNestedInput = {
+    create?: XOR<HotelConfigCreateWithoutChangeLogsInput, HotelConfigUncheckedCreateWithoutChangeLogsInput>
+    connectOrCreate?: HotelConfigCreateOrConnectWithoutChangeLogsInput
+    upsert?: HotelConfigUpsertWithoutChangeLogsInput
+    connect?: HotelConfigWhereUniqueInput
+    update?: XOR<XOR<HotelConfigUpdateToOneWithWhereWithoutChangeLogsInput, HotelConfigUpdateWithoutChangeLogsInput>, HotelConfigUncheckedUpdateWithoutChangeLogsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -15127,6 +16526,139 @@ export namespace Prisma {
     reservations?: ReservationUncheckedUpdateManyWithoutRoomNestedInput
   }
 
+  export type HotelConfigChangeLogCreateWithoutHotelConfigInput = {
+    id?: string
+    field: string
+    oldValue?: string | null
+    newValue?: string | null
+    changedBy: string
+    changedAt?: Date | string
+  }
+
+  export type HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput = {
+    id?: string
+    field: string
+    oldValue?: string | null
+    newValue?: string | null
+    changedBy: string
+    changedAt?: Date | string
+  }
+
+  export type HotelConfigChangeLogCreateOrConnectWithoutHotelConfigInput = {
+    where: HotelConfigChangeLogWhereUniqueInput
+    create: XOR<HotelConfigChangeLogCreateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput>
+  }
+
+  export type HotelConfigChangeLogCreateManyHotelConfigInputEnvelope = {
+    data: HotelConfigChangeLogCreateManyHotelConfigInput | HotelConfigChangeLogCreateManyHotelConfigInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type HotelConfigChangeLogUpsertWithWhereUniqueWithoutHotelConfigInput = {
+    where: HotelConfigChangeLogWhereUniqueInput
+    update: XOR<HotelConfigChangeLogUpdateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedUpdateWithoutHotelConfigInput>
+    create: XOR<HotelConfigChangeLogCreateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedCreateWithoutHotelConfigInput>
+  }
+
+  export type HotelConfigChangeLogUpdateWithWhereUniqueWithoutHotelConfigInput = {
+    where: HotelConfigChangeLogWhereUniqueInput
+    data: XOR<HotelConfigChangeLogUpdateWithoutHotelConfigInput, HotelConfigChangeLogUncheckedUpdateWithoutHotelConfigInput>
+  }
+
+  export type HotelConfigChangeLogUpdateManyWithWhereWithoutHotelConfigInput = {
+    where: HotelConfigChangeLogScalarWhereInput
+    data: XOR<HotelConfigChangeLogUpdateManyMutationInput, HotelConfigChangeLogUncheckedUpdateManyWithoutHotelConfigInput>
+  }
+
+  export type HotelConfigChangeLogScalarWhereInput = {
+    AND?: HotelConfigChangeLogScalarWhereInput | HotelConfigChangeLogScalarWhereInput[]
+    OR?: HotelConfigChangeLogScalarWhereInput[]
+    NOT?: HotelConfigChangeLogScalarWhereInput | HotelConfigChangeLogScalarWhereInput[]
+    id?: StringFilter<"HotelConfigChangeLog"> | string
+    hotelConfigId?: StringFilter<"HotelConfigChangeLog"> | string
+    field?: StringFilter<"HotelConfigChangeLog"> | string
+    oldValue?: StringNullableFilter<"HotelConfigChangeLog"> | string | null
+    newValue?: StringNullableFilter<"HotelConfigChangeLog"> | string | null
+    changedBy?: StringFilter<"HotelConfigChangeLog"> | string
+    changedAt?: DateTimeFilter<"HotelConfigChangeLog"> | Date | string
+  }
+
+  export type HotelConfigCreateWithoutChangeLogsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    checkInTime: string
+    checkOutTime: string
+    cancellationPolicy?: string | null
+    taxRateBp: number
+    amenities?: NullableJsonNullValueInput | InputJsonValue
+    updatedAt?: Date | string
+  }
+
+  export type HotelConfigUncheckedCreateWithoutChangeLogsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    checkInTime: string
+    checkOutTime: string
+    cancellationPolicy?: string | null
+    taxRateBp: number
+    amenities?: NullableJsonNullValueInput | InputJsonValue
+    updatedAt?: Date | string
+  }
+
+  export type HotelConfigCreateOrConnectWithoutChangeLogsInput = {
+    where: HotelConfigWhereUniqueInput
+    create: XOR<HotelConfigCreateWithoutChangeLogsInput, HotelConfigUncheckedCreateWithoutChangeLogsInput>
+  }
+
+  export type HotelConfigUpsertWithoutChangeLogsInput = {
+    update: XOR<HotelConfigUpdateWithoutChangeLogsInput, HotelConfigUncheckedUpdateWithoutChangeLogsInput>
+    create: XOR<HotelConfigCreateWithoutChangeLogsInput, HotelConfigUncheckedCreateWithoutChangeLogsInput>
+    where?: HotelConfigWhereInput
+  }
+
+  export type HotelConfigUpdateToOneWithWhereWithoutChangeLogsInput = {
+    where?: HotelConfigWhereInput
+    data: XOR<HotelConfigUpdateWithoutChangeLogsInput, HotelConfigUncheckedUpdateWithoutChangeLogsInput>
+  }
+
+  export type HotelConfigUpdateWithoutChangeLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInTime?: StringFieldUpdateOperationsInput | string
+    checkOutTime?: StringFieldUpdateOperationsInput | string
+    cancellationPolicy?: NullableStringFieldUpdateOperationsInput | string | null
+    taxRateBp?: IntFieldUpdateOperationsInput | number
+    amenities?: NullableJsonNullValueInput | InputJsonValue
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HotelConfigUncheckedUpdateWithoutChangeLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInTime?: StringFieldUpdateOperationsInput | string
+    checkOutTime?: StringFieldUpdateOperationsInput | string
+    cancellationPolicy?: NullableStringFieldUpdateOperationsInput | string | null
+    taxRateBp?: IntFieldUpdateOperationsInput | number
+    amenities?: NullableJsonNullValueInput | InputJsonValue
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RoomCreateManyRoomTypeInput = {
     id?: string
     roomNumber: string
@@ -15563,6 +17095,42 @@ export namespace Prisma {
     changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type HotelConfigChangeLogCreateManyHotelConfigInput = {
+    id?: string
+    field: string
+    oldValue?: string | null
+    newValue?: string | null
+    changedBy: string
+    changedAt?: Date | string
+  }
+
+  export type HotelConfigChangeLogUpdateWithoutHotelConfigInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HotelConfigChangeLogUncheckedUpdateWithoutHotelConfigInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HotelConfigChangeLogUncheckedUpdateManyWithoutHotelConfigInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    field?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: StringFieldUpdateOperationsInput | string
+    changedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
 
 
   /**
@@ -15584,6 +17152,10 @@ export namespace Prisma {
      * @deprecated Use ReservationCountOutputTypeDefaultArgs instead
      */
     export type ReservationCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ReservationCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use HotelConfigCountOutputTypeDefaultArgs instead
+     */
+    export type HotelConfigCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HotelConfigCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use RoomTypeDefaultArgs instead
      */
@@ -15620,6 +17192,10 @@ export namespace Prisma {
      * @deprecated Use HotelConfigDefaultArgs instead
      */
     export type HotelConfigArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HotelConfigDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use HotelConfigChangeLogDefaultArgs instead
+     */
+    export type HotelConfigChangeLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HotelConfigChangeLogDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

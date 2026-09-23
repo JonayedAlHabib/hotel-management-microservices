@@ -91,8 +91,24 @@ function SettingRow({ icon: Icon, title, subtitle, expanded, onToggle, disabled,
 
 const EMPTY_PROFILE = { name: "", phone: "", address: "", nationality: "", idType: "", idNumber: "" };
 
+// Mirrors services/auth-service/src/middleware/validate.js — kept in sync manually
+// (no shared package between frontend and this service), gives instant feedback
+// before the round-trip; the backend is still the actual source of truth.
+const NID_RE = /^(\d{10}|\d{13}|\d{17})$/;
+const PASSPORT_RE = /^[A-Z]{1,2}\d{6,7}$/;
+
+function validateIdNumber(idType, idNumber) {
+  if (!idNumber) return "";
+  if (!idType) return "Select an ID Type before entering an ID number";
+  const normalized = idNumber.toUpperCase();
+  if (idType === "NID" && !NID_RE.test(normalized)) return "NID number must be exactly 10, 13, or 17 digits";
+  if (idType === "PASSPORT" && !PASSPORT_RE.test(normalized)) return "Passport number must be 1-2 letters followed by 6-7 digits";
+  return "";
+}
+
 function ProfileForm({ fallbackEmail }) {
   const [form, setForm] = useState(EMPTY_PROFILE);
+  const [loadedIdNumber, setLoadedIdNumber] = useState(""); // masked value as returned by GET /auth/profile
   const [email, setEmail] = useState(fallbackEmail || "");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -115,6 +131,7 @@ function ProfileForm({ fallbackEmail }) {
           idType: u.idType || "",
           idNumber: u.idNumber || "",
         });
+        setLoadedIdNumber(u.idNumber || "");
       } catch {
         // profile fetch failed — form still usable with whatever we already have from auth context
       } finally {
@@ -131,15 +148,27 @@ function ProfileForm({ fallbackEmail }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  // idNumber comes back masked from the server — only re-validate it client-side
+  // if the guest actually retyped it (otherwise we'd be validating the mask itself).
+  const idNumberChanged = form.idNumber !== loadedIdNumber;
+  const idNumberError = idNumberChanged ? validateIdNumber(form.idType, form.idNumber) : "";
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    if (idNumberError) {
+      setError(idNumberError);
+      return;
+    }
+
     setSaving(true);
     try {
       const res = await apiClient.patch("/auth/profile", form);
       const u = res.data.data.user;
       setForm((f) => ({ ...f, idNumber: u.idNumber || f.idNumber }));
+      setLoadedIdNumber(u.idNumber || "");
       setSuccess("Profile updated");
     } catch (err) {
       setError(err.response?.data?.message || "Could not update profile");
@@ -162,12 +191,35 @@ function ProfileForm({ fallbackEmail }) {
       <ProfileField label="Phone" name="phone" value={form.phone} onChange={handleChange} />
       <ProfileField label="Address" name="address" value={form.address} onChange={handleChange} />
       <ProfileField label="Nationality" name="nationality" value={form.nationality} onChange={handleChange} />
-      <ProfileField label="ID Type" name="idType" value={form.idType} onChange={handleChange} placeholder="Passport, NID, ..." />
-      <ProfileField label="ID Number" name="idNumber" value={form.idNumber} onChange={handleChange} />
+
+      <div>
+        <label className="block text-xs font-medium text-forest-900/60 mb-1">ID Type</label>
+        <select
+          name="idType"
+          value={form.idType}
+          onChange={handleChange}
+          className="w-full border border-forest-900/15 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sand-gold/40 focus:border-sand-gold"
+        >
+          <option value="">Select ID Type</option>
+          <option value="NID">NID</option>
+          <option value="PASSPORT">Passport</option>
+        </select>
+      </div>
+
+      <div>
+        <ProfileField
+          label="ID Number"
+          name="idNumber"
+          value={form.idNumber}
+          onChange={handleChange}
+          placeholder={form.idType === "NID" ? "10, 13, or 17 digits" : form.idType === "PASSPORT" ? "e.g. BN0123456" : ""}
+        />
+        {idNumberError && <p className="mt-1 text-xs text-red-600">{idNumberError}</p>}
+      </div>
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={saving || Boolean(idNumberError)}
         className="w-full bg-forest-900 text-white rounded-full py-2.5 text-sm font-medium hover:bg-forest-800 disabled:opacity-50"
       >
         {saving ? "Saving…" : "Save changes"}

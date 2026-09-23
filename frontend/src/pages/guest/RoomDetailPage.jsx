@@ -39,6 +39,10 @@ export default function RoomDetailPage() {
   const [checking, setChecking] = useState(false);
   const [checkError, setCheckError] = useState("");
 
+  const [availableRooms, setAvailableRooms] = useState(null);
+  const [selectedRoomId, setSelectedRoomId] = useState("");
+  const [roomsError, setRoomsError] = useState("");
+
   const [form, setForm] = useState({
     guestName: user?.name || "",
     guestPhone: user?.phone || "",
@@ -102,6 +106,33 @@ export default function RoomDetailPage() {
     };
   }, [id, checkIn, checkOut, guestCount, hasDates]);
 
+  const roomTypeAvailable = Boolean(availability?.available);
+
+  // Which actual room numbers of this type are still free for these dates —
+  // guests pick one of these, not just the room type. Refetched (and the
+  // previous selection cleared) whenever the type-level availability check
+  // above says these dates are bookable.
+  useEffect(() => {
+    if (!hasDates || !roomTypeAvailable) return;
+
+    let cancelled = false;
+    async function loadRooms() {
+      setAvailableRooms(null);
+      setSelectedRoomId("");
+      setRoomsError("");
+      try {
+        const res = await bookingApi.get(`/room-types/${id}/available-rooms`, { params: { checkIn, checkOut } });
+        if (!cancelled) setAvailableRooms(res.data.data.rooms);
+      } catch (err) {
+        if (!cancelled) setRoomsError(err.response?.data?.message || "Could not load available rooms");
+      }
+    }
+    loadRooms();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, checkIn, checkOut, hasDates, roomTypeAvailable]);
+
   if (error) {
     return (
       <div className="px-6 py-10 max-w-md space-y-3">
@@ -122,7 +153,8 @@ export default function RoomDetailPage() {
   const availableRoomType = hasDates ? availability?.roomType : null;
   const nights = availableRoomType ? availability.nights : 0;
   const estimatedSubtotal = availableRoomType ? nights * availableRoomType.basePrice : 0;
-  const canSubmit = hasDates && availability?.available && !checking && form.guestName;
+  const canSubmit = hasDates && availability?.available && !checking && form.guestName && Boolean(selectedRoomId);
+  const selectedRoom = availableRooms?.find((r) => r.id === selectedRoomId) || null;
 
   function handleDateChange(e) {
     setDates({ ...dates, [e.target.name]: e.target.value });
@@ -143,6 +175,8 @@ export default function RoomDetailPage() {
     navigate(`/rooms/${id}/payment`, {
       state: {
         roomTypeId: id,
+        roomId: selectedRoomId,
+        roomNumber: selectedRoom?.roomNumber || null,
         checkIn,
         checkOut,
         guestCount,
@@ -361,6 +395,54 @@ export default function RoomDetailPage() {
                 </BookingField>
               </div>
 
+              {checkError && <p className="text-sm text-red-600">{checkError}</p>}
+              {hasDates && !checking && availability && !availability.available && (
+                <p className="text-sm text-red-600">Sorry, this room isn't available for these dates.</p>
+              )}
+              {checking && <p className="text-xs text-forest-900/50">Checking availability…</p>}
+
+              <BookingField label="Select Room">
+                {!hasDates && (
+                  <p className="text-xs text-forest-900/50 border border-dashed border-forest-900/15 rounded-lg px-3 py-2">
+                    Enter your check-in and check-out dates above to see which room numbers are available.
+                  </p>
+                )}
+                {hasDates && checking && <p className="text-xs text-forest-900/50">Checking dates…</p>}
+                {hasDates && !checking && availability && !roomTypeAvailable && (
+                  <p className="text-xs text-forest-900/50">No rooms of this type are available for these dates.</p>
+                )}
+                {hasDates && roomTypeAvailable && (
+                  <>
+                    {roomsError && <p className="text-sm text-red-600">{roomsError}</p>}
+                    {!roomsError && availableRooms === null && (
+                      <p className="text-xs text-forest-900/50">Loading available rooms…</p>
+                    )}
+                    {!roomsError && availableRooms?.length === 0 && (
+                      <p className="text-xs text-red-600">No specific room is free right now — please try again in a moment.</p>
+                    )}
+                    {!roomsError && availableRooms?.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {availableRooms.map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setSelectedRoomId(r.id)}
+                            className={`rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
+                              selectedRoomId === r.id
+                                ? "border-sand-gold bg-forest-50 text-forest-900"
+                                : "border-forest-900/15 text-forest-900/70 hover:border-forest-900/30"
+                            }`}
+                          >
+                            Room {r.roomNumber}
+                            {r.floor && <span className="block text-forest-900/40">Floor {r.floor}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </BookingField>
+
               <BookingField label="Room Type">
                 <select
                   value={id}
@@ -385,12 +467,6 @@ export default function RoomDetailPage() {
                   className="w-full border border-forest-900/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sand-gold/40 focus:border-sand-gold"
                 />
               </BookingField>
-
-              {checkError && <p className="text-sm text-red-600">{checkError}</p>}
-              {hasDates && !checking && availability && !availability.available && (
-                <p className="text-sm text-red-600">Sorry, this room isn't available for these dates.</p>
-              )}
-              {checking && <p className="text-xs text-forest-900/50">Checking availability…</p>}
 
               {availableRoomType && (
                 <div className="border-t border-forest-900/10 pt-3 space-y-1">

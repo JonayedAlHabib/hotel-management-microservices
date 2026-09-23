@@ -62,4 +62,36 @@ async function checkAvailability(client, { roomTypeId, checkIn, checkOut, exclud
   return { available: remaining >= 1, remaining, totalRooms };
 }
 
-export { checkAvailability, getEligibleRoomCount, getOverlappingReservations };
+// Lets a guest pick a specific physical room (roomNumber/floor), not just a
+// room type — different guarantee from checkAvailability's pooled count: a
+// room is only free here if THAT exact roomId has no conflicting reservation,
+// not just if the type has enough rooms somewhere. Same eligible-room rules
+// (active, not MAINTENANCE/OUT_OF_SERVICE) and the same overlap definition
+// assignRoom's admin-side conflict check already uses.
+async function listAvailableRooms(client, { roomTypeId, checkIn, checkOut }) {
+  const rooms = await client.room.findMany({
+    where: {
+      roomTypeId,
+      isActive: true,
+      status: { notIn: ROOM_STATUSES_EXCLUDED_FROM_AVAILABILITY },
+    },
+    orderBy: { roomNumber: "asc" },
+  });
+  if (rooms.length === 0) return [];
+
+  const now = new Date();
+  const conflicting = await client.reservation.findMany({
+    where: {
+      roomId: { in: rooms.map((r) => r.id) },
+      checkIn: { lt: checkOut },
+      checkOut: { gt: checkIn },
+      OR: [{ status: "CONFIRMED" }, { status: "PENDING", holdExpiresAt: { gt: now } }],
+    },
+    select: { roomId: true },
+  });
+  const bookedRoomIds = new Set(conflicting.map((r) => r.roomId));
+
+  return rooms.filter((r) => !bookedRoomIds.has(r.id));
+}
+
+export { checkAvailability, getEligibleRoomCount, getOverlappingReservations, listAvailableRooms };

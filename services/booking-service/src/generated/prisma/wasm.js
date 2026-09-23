@@ -225,6 +225,16 @@ exports.Prisma.HotelConfigScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.HotelConfigChangeLogScalarFieldEnum = {
+  id: 'id',
+  hotelConfigId: 'hotelConfigId',
+  field: 'field',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  changedBy: 'changedBy',
+  changedAt: 'changedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -283,7 +293,8 @@ exports.Prisma.ModelName = {
   ReservationStatusHistory: 'ReservationStatusHistory',
   ReservationChangeLog: 'ReservationChangeLog',
   RoomStatusHistory: 'RoomStatusHistory',
-  HotelConfig: 'HotelConfig'
+  HotelConfig: 'HotelConfig',
+  HotelConfigChangeLog: 'HotelConfigChangeLog'
 };
 
 /**

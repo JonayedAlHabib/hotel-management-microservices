@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import bookingApi from "../../api/bookingClient";
 import { formatMoney } from "../../utils/money";
 
@@ -86,9 +87,17 @@ export default function BookingsManagementPage() {
 
   return (
     <div className="px-6 py-6 space-y-5 max-w-6xl">
-      <div>
-        <h1 className="text-xl font-semibold text-navy-900">Bookings Management</h1>
-        <p className="text-sm text-navy-400 mt-1">Track the latest guest bookings</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-navy-900">Bookings Management</h1>
+          <p className="text-sm text-navy-400 mt-1">Track the latest guest bookings</p>
+        </div>
+        <Link
+          to="/admin/bookings/new"
+          className="bg-navy-800 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-navy-900 whitespace-nowrap"
+        >
+          + New Walk-in / Phone Booking
+        </Link>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

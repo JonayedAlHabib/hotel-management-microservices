@@ -5,7 +5,7 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { recordFailedLogin, clearLoginAttempts } from "../middleware/rateLimiter.js";
 import { sendPasswordResetEmail } from "../utils/mailer.js";
-import { PASSWORD_RE } from "../middleware/validate.js";
+import { PASSWORD_RE, ID_TYPES, NID_RE, PASSPORT_RE } from "../middleware/validate.js";
 import {
   signAccessToken,
   generateRefreshToken,
@@ -155,8 +155,32 @@ async function updateProfile(req, res) {
   if (phone !== undefined) user.phone = phone;
   if (address !== undefined) user.address = address;
   if (nationality !== undefined) user.nationality = nationality;
+
+  if (idType !== undefined && idType !== "" && !ID_TYPES.includes(idType)) {
+    throw new ApiError(400, "ID Type must be NID or Passport");
+  }
+
+  // GET /auth/profile masks idNumber (e.g. "••••••7890"). If the client resubmits
+  // that unchanged masked value (user never touched the field), treat it as a
+  // no-op rather than trying to validate/store the mask itself as a real ID number.
+  const idNumberUnchanged = idNumber !== undefined && idNumber === maskIdNumber(user.idNumber);
+
+  if (idNumber !== undefined && !idNumberUnchanged && idNumber !== "") {
+    const effectiveType = idType !== undefined ? idType : user.idType;
+    if (!effectiveType) {
+      throw new ApiError(400, "Select an ID Type before entering an ID number");
+    }
+    const normalized = idNumber.toUpperCase();
+    if (effectiveType === "NID" && !NID_RE.test(normalized)) {
+      throw new ApiError(400, "NID number must be exactly 10, 13, or 17 digits");
+    }
+    if (effectiveType === "PASSPORT" && !PASSPORT_RE.test(normalized)) {
+      throw new ApiError(400, "Passport number must be 1-2 letters followed by 6-7 digits");
+    }
+  }
+
   if (idType !== undefined) user.idType = idType;
-  if (idNumber !== undefined) user.idNumber = idNumber;
+  if (idNumber !== undefined && !idNumberUnchanged) user.idNumber = idNumber;
 
   await user.save();
 

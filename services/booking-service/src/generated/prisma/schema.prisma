@@ -64,29 +64,37 @@ model Guest {
 }
 
 model Reservation {
-  id             String                     @id @default(uuid())
-  idempotencyKey String                     @unique @map("idempotency_key")
-  reference      String                     @unique
-  guestId        String                     @map("guest_id")
-  guest          Guest                      @relation(fields: [guestId], references: [id])
-  roomTypeId     String                     @map("room_type_id")
-  roomType       RoomType                   @relation(fields: [roomTypeId], references: [id])
-  roomId         String?                    @map("room_id")
-  room           Room?                      @relation(fields: [roomId], references: [id])
-  checkIn        DateTime                   @map("check_in") @db.Date
-  checkOut       DateTime                   @map("check_out") @db.Date
-  guestCount     Int                        @map("guest_count")
-  specialRequest String?                    @map("special_request") // UC-G09 AC2: up to 500 chars, visible to admin
-  status         ReservationStatus          @default(PENDING)
-  source         ReservationSource          @default(ONLINE)
-  rateSnapshot   Int                        @map("rate_snapshot")
-  taxRateBp      Int                        @map("tax_rate_bp") // basis points, e.g. 500 = 5.00% — BR-03
-  totalAmount    Int                        @map("total_amount")
-  holdExpiresAt  DateTime?                  @map("hold_expires_at")
-  createdBy      String                     @map("created_by")
-  createdAt      DateTime                   @default(now()) @map("created_at")
-  history        ReservationStatusHistory[]
-  changeLog      ReservationChangeLog[]
+  id                    String                     @id @default(uuid())
+  idempotencyKey        String                     @unique @map("idempotency_key")
+  reference             String                     @unique
+  guestId               String                     @map("guest_id")
+  guest                 Guest                      @relation(fields: [guestId], references: [id])
+  roomTypeId            String                     @map("room_type_id")
+  roomType              RoomType                   @relation(fields: [roomTypeId], references: [id])
+  roomId                String?                    @map("room_id")
+  room                  Room?                      @relation(fields: [roomId], references: [id])
+  checkIn               DateTime                   @map("check_in") @db.Date
+  checkOut              DateTime                   @map("check_out") @db.Date
+  guestCount            Int                        @map("guest_count")
+  specialRequest        String?                    @map("special_request") // UC-G09 AC2: up to 500 chars, visible to admin
+  status                ReservationStatus          @default(PENDING)
+  source                ReservationSource          @default(ONLINE)
+  rateSnapshot          Int                        @map("rate_snapshot")
+  taxRateBp             Int                        @map("tax_rate_bp") // basis points, e.g. 500 = 5.00% — BR-03
+  totalAmount           Int                        @map("total_amount")
+  holdExpiresAt         DateTime?                  @map("hold_expires_at")
+  // UC-G11 / A-04: set only on cancellation — first-night charge if cancelled
+  // inside the free-cancellation window, 0 otherwise. Null until cancelled.
+  // Deliberately NOT a refundDueAmount field: booking-service has no
+  // visibility into what was actually paid (payment-service's own DB) — the
+  // frontend computes refund-due from this fee + the guest's own payment
+  // history, rather than booking-service guessing or calling out to another
+  // service just to set a display field.
+  cancellationFeeAmount Int?                       @map("cancellation_fee_amount")
+  createdBy             String                     @map("created_by")
+  createdAt             DateTime                   @default(now()) @map("created_at")
+  history               ReservationStatusHistory[]
+  changeLog             ReservationChangeLog[]
 
   @@index([roomTypeId, checkIn, checkOut])
   @@map("reservations")
@@ -134,6 +142,45 @@ model RoomStatusHistory {
   changedAt  DateTime @default(now()) @map("changed_at")
 
   @@map("room_status_history")
+}
+
+// UC-G06 / UC-A29: singleton row (exactly one, created by the seed below) —
+// the hotel-info fields a not-yet-logged-in guest can see, plus taxRateBp,
+// which is the one field with a real backend consumer (reservation.service.js).
+// Admin editing (UC-A29) covers only the content fields (name..cancellationPolicy);
+// taxRateBp/amenities are a pricing-policy change, deliberately left out of this
+// endpoint — see hotelConfig.controller.js.
+model HotelConfig {
+  id                 String                 @id @default(uuid())
+  name               String
+  description        String?
+  address            String?
+  phone              String?
+  email              String?
+  checkInTime        String                 @map("check_in_time")
+  checkOutTime       String                 @map("check_out_time")
+  cancellationPolicy String?                @map("cancellation_policy") @db.Text
+  taxRateBp          Int                    @map("tax_rate_bp")
+  amenities          Json?
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+  changeLogs         HotelConfigChangeLog[]
+
+  @@map("hotel_config")
+}
+
+// UC-A29 AC3 (BR-11): every admin content edit stored as field/old value/new
+// value/user/time — same shape as ReservationChangeLog above.
+model HotelConfigChangeLog {
+  id            String      @id @default(uuid())
+  hotelConfigId String      @map("hotel_config_id")
+  hotelConfig   HotelConfig @relation(fields: [hotelConfigId], references: [id])
+  field         String
+  oldValue      String?     @map("old_value")
+  newValue      String?     @map("new_value")
+  changedBy     String      @map("changed_by")
+  changedAt     DateTime    @default(now()) @map("changed_at")
+
+  @@map("hotel_config_change_log")
 }
 
 enum RoomStatus {

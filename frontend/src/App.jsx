@@ -21,6 +21,7 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import RoomsManagementPage from "./pages/admin/RoomsManagementPage";
 import RoomUnitsPage from "./pages/admin/RoomUnitsPage";
 import BookingsManagementPage from "./pages/admin/BookingsManagementPage";
+import WalkInBookingPage from "./pages/admin/WalkInBookingPage";
 import GuestListPage from "./pages/admin/GuestListPage";
 import TaskManagementPage from "./pages/admin/TaskManagementPage";
 import AdminSettingsPage from "./pages/admin/SettingsPage";
@@ -61,6 +62,7 @@ function App() {
         <Route path="/admin/rooms" element={<RoomsManagementPage />} />
         <Route path="/admin/room-types/:id/rooms" element={<RoomUnitsPage />} />
         <Route path="/admin/bookings" element={<BookingsManagementPage />} />
+        <Route path="/admin/bookings/new" element={<WalkInBookingPage />} />
         <Route path="/admin/guests" element={<GuestListPage />} />
         <Route path="/admin/tasks" element={<TaskManagementPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />

@@ -28,7 +28,14 @@ export default function GuestLayout() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const avatarMenuRef = useRef(null);
+
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    navigate(term ? `/rooms?q=${encodeURIComponent(term)}` : "/rooms");
+  }
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -62,14 +69,16 @@ export default function GuestLayout() {
             ))}
           </nav>
 
-          <div className="relative flex-1 max-w-xs hidden md:block ml-auto">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-xs hidden md:block ml-auto">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-forest-900/30" />
             <input
               type="text"
-              placeholder="Search here..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search rooms..."
               className="w-full pl-9 pr-3 py-2 border border-forest-900/15 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sand-gold/40 focus:border-sand-gold"
             />
-          </div>
+          </form>
 
           <div className="flex items-center gap-3 sm:gap-4 shrink-0 md:ml-4 ml-auto">
             <NotificationsDropdown />

@@ -8,6 +8,7 @@ import {
   uploadRoomTypePhotos,
   deleteRoomTypePhoto,
 } from "../controllers/roomType.controller.js";
+import { getAvailableRooms } from "../controllers/availability.controller.js";
 import { validateRoomType } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireRole } from "../middleware/requireRole.js";
@@ -19,6 +20,7 @@ const router = express.Router();
 router.post("/", requireAuth, requireRole("ADMIN"), validateRoomType, asyncHandler(createRoomType));
 router.get("/", asyncHandler(listRoomTypes));
 router.get("/:id", asyncHandler(getRoomType));
+router.get("/:id/available-rooms", asyncHandler(getAvailableRooms));
 router.patch("/:id/deactivate", requireAuth, requireRole("ADMIN"), asyncHandler(deactivateRoomType));
 router.patch("/:id/reactivate", requireAuth, requireRole("ADMIN"), asyncHandler(reactivateRoomType));
 router.post("/:id/photos", requireAuth, requireRole("ADMIN"), upload.array("photos", 10), asyncHandler(uploadRoomTypePhotos));
