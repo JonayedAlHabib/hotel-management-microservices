@@ -1,5 +1,6 @@
 import { createApiClient } from "./createApiClient";
+import { API_BASE_URL } from "../config/api";
 
-const api = createApiClient(import.meta.env.VITE_API_URL || "http://localhost:4001");
+const api = createApiClient(API_BASE_URL);
 
 export default api;

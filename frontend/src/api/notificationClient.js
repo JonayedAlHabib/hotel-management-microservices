@@ -1,5 +1,6 @@
 import { createApiClient } from "./createApiClient";
+import { API_BASE_URL } from "../config/api";
 
-const notificationApi = createApiClient(import.meta.env.VITE_NOTIFICATION_API_URL || "http://localhost:4004");
+const notificationApi = createApiClient(API_BASE_URL);
 
 export default notificationApi;

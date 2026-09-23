@@ -17,7 +17,7 @@ import fitnessPhoto from "../../assets/amenities/fitness.jpg";
 import spaPhoto from "../../assets/amenities/spa.jpg";
 import poolPhoto from "../../assets/amenities/pool.jpg";
 
-const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+import { API_BASE_URL } from "../../config/api";
 
 // Facility highlight cards — editorial/marketing content, same treatment as
 // PROMOTIONS below (not derived from live booking data). Each still links
@@ -136,7 +136,7 @@ export default function HomePage() {
         <section className="rounded-2xl overflow-hidden relative text-white min-h-80 flex items-center">
           <div className="absolute inset-0 bg-forest-900">
             {heroPhoto && (
-              <img src={`${BOOKING_API_URL}${heroPhoto.url}`} alt="" className="h-full w-full object-cover" />
+              <img src={`${API_BASE_URL}${heroPhoto.url}`} alt="" className="h-full w-full object-cover" />
             )}
           </div>
           <div className="absolute inset-0 bg-linear-to-r from-forest-950/90 via-forest-950/70 to-forest-950/20" />
@@ -342,7 +342,7 @@ function RoomCard({ room }) {
     <div className="bg-white rounded-2xl border border-forest-900/10 overflow-hidden hover:shadow-md transition-shadow">
       <Link to={`/rooms/${room.id}`} className="h-44 bg-forest-50 flex items-center justify-center overflow-hidden">
         {photo ? (
-          <img src={`${BOOKING_API_URL}${photo.url}`} alt={room.name} className="h-full w-full object-cover" />
+          <img src={`${API_BASE_URL}${photo.url}`} alt={room.name} className="h-full w-full object-cover" />
         ) : (
           <BedDouble size={28} className="text-forest-200" />
         )}

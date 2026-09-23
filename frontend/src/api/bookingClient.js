@@ -1,5 +1,6 @@
 import { createApiClient } from "./createApiClient";
+import { API_BASE_URL } from "../config/api";
 
-const bookingApi = createApiClient(import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002");
+const bookingApi = createApiClient(API_BASE_URL);
 
 export default bookingApi;

@@ -5,7 +5,7 @@ import bookingApi from "../../api/bookingClient";
 import { formatMoney } from "../../utils/money";
 import { AMENITY_OPTIONS } from "../../utils/amenities";
 
-const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+import { API_BASE_URL } from "../../config/api";
 const today = new Date().toISOString().slice(0, 10);
 
 // Every filter this page understands lives in the URL, same treatment the
@@ -359,7 +359,7 @@ function RoomCard({ room, remaining }) {
     >
       <div className="h-36 bg-forest-50 flex items-center justify-center overflow-hidden">
         {photo ? (
-          <img src={`${BOOKING_API_URL}${photo.url}`} alt={room.name} className="h-full w-full object-cover" />
+          <img src={`${API_BASE_URL}${photo.url}`} alt={room.name} className="h-full w-full object-cover" />
         ) : (
           <BedDouble size={28} className="text-forest-200" />
         )}

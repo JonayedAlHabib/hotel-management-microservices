@@ -8,7 +8,7 @@ import CancelBookingModal from "./components/CancelBookingModal";
 import PayNowModal from "./components/PayNowModal";
 import PaymentsPanel from "./components/PaymentsPanel";
 
-const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+import { API_BASE_URL } from "../../config/api";
 
 const PAYMENT_BANNER_STYLES = {
   success: "text-green-700 bg-green-50 border-green-200",
@@ -313,7 +313,7 @@ function BookingCard({ r, photoUrl, canCancel, canPay, cancelling, onCancel, onP
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="h-40 sm:h-24 sm:w-32 shrink-0 rounded-xl overflow-hidden bg-forest-50">
           {photoUrl ? (
-            <img src={`${BOOKING_API_URL}${photoUrl}`} alt={r.roomType.name} className="h-full w-full object-cover" />
+            <img src={`${API_BASE_URL}${photoUrl}`} alt={r.roomType.name} className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-forest-200">
               <BedDouble size={26} />

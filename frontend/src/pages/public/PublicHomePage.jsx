@@ -24,7 +24,7 @@ import loungePhoto from "../../assets/hero/lounge.jpg";
 import restaurantPhoto from "../../assets/hero/restaurant.jpg";
 import barPhoto from "../../assets/hero/bar.jpg";
 
-const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+import { API_BASE_URL } from "../../config/api";
 
 const HERO_SLIDES = [
   { src: poolPhoto, alt: "Poolside at " + HOTEL_NAME },
@@ -389,7 +389,7 @@ function RoomCard({ room }) {
       <div className="relative h-48 bg-forest-50">
         <Link to={`/rooms/${room.id}`} className="block h-full w-full">
           {photo ? (
-            <img src={`${BOOKING_API_URL}${photo.url}`} alt={room.name} className="h-full w-full object-cover" />
+            <img src={`${API_BASE_URL}${photo.url}`} alt={room.name} className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-forest-200">
               <BedDouble size={32} />

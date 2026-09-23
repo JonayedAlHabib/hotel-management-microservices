@@ -4,7 +4,7 @@ import bookingApi from "../../api/bookingClient";
 import { formatMoney } from "../../utils/money";
 import { AMENITY_OPTIONS } from "../../utils/amenities";
 
-const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+import { API_BASE_URL } from "../../config/api";
 
 const EMPTY_FORM = { name: "", description: "", basePrice: "", maxGuests: "", bedType: "" };
 
@@ -150,7 +150,7 @@ export default function RoomsManagementPage() {
             <div key={room.id} className="bg-white rounded-2xl border border-navy-100 overflow-hidden">
               <div className="h-32 bg-navy-50 flex items-center justify-center overflow-hidden">
                 {mainPhoto ? (
-                  <img src={`${BOOKING_API_URL}${mainPhoto.url}`} alt={room.name} className="h-full w-full object-cover" />
+                  <img src={`${API_BASE_URL}${mainPhoto.url}`} alt={room.name} className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-navy-200 text-3xl">🛏️</span>
                 )}
@@ -160,7 +160,7 @@ export default function RoomsManagementPage() {
                 <div className="flex gap-1.5 px-4 pt-3 flex-wrap">
                   {photos.map((p) => (
                     <div key={p.id} className="relative h-10 w-10 rounded-lg overflow-hidden group shrink-0">
-                      <img src={`${BOOKING_API_URL}${p.url}`} alt="" className="h-full w-full object-cover" />
+                      <img src={`${API_BASE_URL}${p.url}`} alt="" className="h-full w-full object-cover" />
                       <button
                         type="button"
                         onClick={() => handleDeletePhoto(room.id, p.id)}

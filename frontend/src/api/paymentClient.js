@@ -1,5 +1,6 @@
 import { createApiClient } from "./createApiClient";
+import { API_BASE_URL } from "../config/api";
 
-const paymentApi = createApiClient(import.meta.env.VITE_PAYMENT_API_URL || "http://localhost:4003");
+const paymentApi = createApiClient(API_BASE_URL);
 
 export default paymentApi;

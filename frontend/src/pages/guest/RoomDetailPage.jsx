@@ -15,7 +15,7 @@ import { formatMoney } from "../../utils/money";
 import { amenityEntries } from "../../utils/amenities";
 import { HOTEL_ADDRESS, HOTEL_CHECK_IN, HOTEL_CHECK_OUT } from "../../config/hotel";
 
-const BOOKING_API_URL = import.meta.env.VITE_BOOKING_API_URL || "http://localhost:4002";
+import { API_BASE_URL } from "../../config/api";
 const today = new Date().toISOString().slice(0, 10);
 
 export default function RoomDetailPage() {
@@ -520,14 +520,14 @@ function Gallery({ photos, roomName }) {
               i === activePhoto ? "border-sand-gold" : "border-transparent opacity-70 hover:opacity-100"
             }`}
           >
-            <img src={`${BOOKING_API_URL}${p.url}`} alt="" className="h-full w-full object-cover" />
+            <img src={`${API_BASE_URL}${p.url}`} alt="" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
 
       <div className="relative rounded-2xl overflow-hidden bg-forest-50">
         <img
-          src={`${BOOKING_API_URL}${photos[activePhoto].url}`}
+          src={`${API_BASE_URL}${photos[activePhoto].url}`}
           alt={roomName}
           className="h-full w-full object-cover"
         />
