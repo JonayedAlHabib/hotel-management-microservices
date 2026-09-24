@@ -14,12 +14,16 @@ const COMMON_AMENITIES = {
   roomService: true,
 };
 
+// basePrice is in poisha (minor units, BR-12) — frontend formatMoney() divides
+// by 100, so 1200000 displays as ৳12,000. Writing a "taka" value here (e.g.
+// 12000) silently overwrites live prices at 1/100th on re-run, since this
+// script upserts.
 const ROOM_TYPES = [
   {
     name: "Deluxe Room",
     description:
       "A comfortable and elegantly furnished room designed for couples and business travelers, featuring modern amenities and a relaxing atmosphere.",
-    basePrice: 12000,
+    basePrice: 1200000,
     maxGuests: 2,
     bedType: "King Bed",
     amenities: { ...COMMON_AMENITIES, minibar: true, pool: true },
@@ -30,7 +34,7 @@ const ROOM_TYPES = [
     name: "Superior Room",
     description:
       "A spacious room with upgraded furnishings, modern facilities and a comfortable living space for a relaxing hotel stay.",
-    basePrice: 15000,
+    basePrice: 1500000,
     maxGuests: 2,
     bedType: "King Bed",
     amenities: { ...COMMON_AMENITIES, minibar: true, pool: true },
@@ -41,7 +45,7 @@ const ROOM_TYPES = [
     name: "Twin Room",
     description:
       "A practical and comfortable room featuring two separate single beds, ideal for friends, colleagues and business travelers.",
-    basePrice: 14000,
+    basePrice: 1400000,
     maxGuests: 2,
     bedType: "2 Single Beds",
     amenities: { ...COMMON_AMENITIES, pool: true },
@@ -52,7 +56,7 @@ const ROOM_TYPES = [
     name: "Family Room",
     description:
       "A spacious family-friendly room with multiple sleeping arrangements and enough space for families traveling together.",
-    basePrice: 18000,
+    basePrice: 1800000,
     maxGuests: 4,
     bedType: "1 King + 2 Single",
     amenities: { ...COMMON_AMENITIES, minibar: true, pool: true },
@@ -63,7 +67,7 @@ const ROOM_TYPES = [
     name: "Executive Suite",
     description:
       "A premium suite designed for business executives and guests seeking additional space, privacy and upgraded amenities.",
-    basePrice: 25000,
+    basePrice: 2500000,
     maxGuests: 3,
     bedType: "King Bed",
     amenities: { ...COMMON_AMENITIES, minibar: true, pool: true, workDesk: true },
@@ -74,7 +78,7 @@ const ROOM_TYPES = [
     name: "Honeymoon Suite",
     description:
       "A romantic premium suite designed for couples, featuring elegant interiors, a spacious bedroom and a private relaxing atmosphere.",
-    basePrice: 30000,
+    basePrice: 3000000,
     maxGuests: 2,
     bedType: "King Bed",
     amenities: { ...COMMON_AMENITIES, minibar: true, pool: true, bathtub: true },
